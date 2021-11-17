@@ -12,8 +12,6 @@
 #define _XOPEN_SOURCE 700
 
 
-
-//test ato
 struct OrderP
 {
     bool isOk;
