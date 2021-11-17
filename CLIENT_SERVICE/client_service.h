@@ -3,5 +3,8 @@
 
 // Ici toutes les communications entre les services et les clients :
 // - les deux tubes nommés pour la communication bidirectionnelle
+typedef struct PassWordP * PassWord;
+
+
 
 #endif

@@ -15,5 +15,7 @@
 #define SERVICE_COMPRESSION  1
 #define SERVICE_MAXIMUM      2
 
+typedef struct ReponseRequestP * ReponseRequest;
+
 
 #endif

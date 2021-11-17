@@ -1,13 +1,15 @@
+#define  _XOPEN_SOURCE 700
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
 #include "orchestre_service.h"
 #include "client_service.h"
 #include "service.h"
 #include "service_somme.h"
 #include "service_compression.h"
 #include "service_maximum.h"
+#include <string.h>
+
 
 
 static void usage(const char *exeName, const char *message)
@@ -24,7 +26,6 @@ static void usage(const char *exeName, const char *message)
     exit(EXIT_FAILURE);
 }
 
-
 /*----------------------------------------------*
  * fonction main
  *----------------------------------------------*/
@@ -33,34 +34,47 @@ int main(int argc, char * argv[])
     if (argc != 6)
         usage(argv[0], "nombre paramètres incorrect");
 
+    int fdServiceFromOrchestre;
+    int fdServiceToClient;
+    int fdClientToService;
+
     // initialisations diverses : analyse de argv
+    fdServiceFromOrchestre = strtol(argv[2], NULL, 10);
 
     while (true)
     {
         // attente d'un code de l'orchestre (via tube anonyme)
-        // si code de fin
-        //    sortie de la boucle
-        // sinon
-        //    réception du mot de passe de l'orchestre
-        //    ouverture des deux tubes nommés avec le client
-        //    attente du mot de passe du client
-        //    si mot de passe incorrect
-        //        envoi au client d'un code d'erreur
-        //    sinon
-        //        envoi au client d'un code d'acceptation
-        //        appel de la fonction de communication avec le client :
-        //            une fct par service selon numService (cf. argv[1]) :
-        //                   . service_somme
-        //                ou . service_compression
-        //                ou . service_maximum
-        //        attente de l'accusé de réception du client
-        //    finsi
-        //    fermeture ici des deux tubes nommés avec le client
-        //    modification du sémaphore pour prévenir l'orchestre de la fin
-        // finsi
+        Order order = getOrderFromOrchestre(fdServiceFromOrchestre);
+
+        if(!isItOk(order))
+              break;            //code de fin => sortie de la boucle
+        else
+        {
+            char * passeword = strdup(getMotpasse(order));    //réception du mot de passe de l'orchestre
+
+            fdServiceToClient = open(argv[3], O_WRONLY, 0644);     //ouverture des deux tubes nommés avec le client
+            fdClientToService = open(argv[4], O_RDONLY, 0644);
+
+            //    si mot de passe incorrect
+              
+            //        envoi au client d'un code d'erreur
+            //    sinon
+            //        envoi au client d'un code d'acceptation
+            //        appel de la fonction de communication avec le client :
+            //            une fct par service selon numService (cf. argv[1]) :
+            //                   . service_somme
+            //                ou . service_compression
+            //                ou . service_maximum
+            //        attente de l'accusé de réception du client
+            //    finsi
+            //    fermeture ici des deux tubes nommés avec le client
+            //    modification du sémaphore pour prévenir l'orchestre de la fin
+            // finsi
+        }
+
     }
 
     // libération éventuelle de ressources
-    
+
     return EXIT_SUCCESS;
 }

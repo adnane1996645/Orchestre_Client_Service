@@ -21,7 +21,7 @@ int main(int argc, char * argv[])
 {
     if (argc != 2)
         usage(argv[0], "nombre paramètres incorrect");
-    
+
     bool fin = false;
 
     // lecture du fichier de configuration
@@ -31,7 +31,7 @@ int main(int argc, char * argv[])
     // - création de 2 tubes nommés pour converser avec les clients
     // - création d'un sémaphore pour que deux clients ne
     //   ne communiquent pas en même temps avec l'orchestre
-    
+
     // lancement des services, avec pour chaque service :
     // - création d'un tube anonyme pour converser (orchestre vers service)
     // - un sémaphore pour que le service préviene l'orchestre de la
@@ -82,6 +82,6 @@ int main(int argc, char * argv[])
     // attente de la terminaison des processus services
 
     // libération des ressources
-    
+
     return EXIT_SUCCESS;
 }
