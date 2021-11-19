@@ -14,9 +14,9 @@ int mysemget();
 void mysem_descre(int semId); // desincremente la valeur du semaphore par 1
 void mysem_incre(int semId); // incremente la valeur du semaphore par 1
 void mysem_destroy(int semId); // détruire le sémaphore
-Order init_Order(bool isok, const char * motpasse);
+Order init_Order(bool isok, const int motpasse);
 bool isItOk(Order self);
-char * getMotpasse(Order self);
+int getMotpasse(Order self);
 void destroy_Order(Order * pself);
 void OrderOrchestreToService(int fdWrite,  Order order);
 Order getOrderFromOrchestre(int fdRead);

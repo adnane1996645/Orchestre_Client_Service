@@ -7,8 +7,8 @@
 
 
 
-char * getPWDFromClient(int fdclientToService)
+int getPWDFromClient(int fdclientToService)
 {
-      char * mot[100];
-      read(fdclientToService, mot, )
+      int pwd;
+      read(fdclientToService, &pwd, sizeof(int));
 }

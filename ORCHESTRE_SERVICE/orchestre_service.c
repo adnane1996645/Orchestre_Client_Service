@@ -15,23 +15,18 @@
 struct OrderP
 {
     bool isOk;
-    int size;
-    char * motpasse;
+    int motpasse;
 };
 
-Order init_Order(bool isok, const char * motpasse)
+Order init_Order(bool isok, const int motpasse)
 {
     Order ret;
 
     ret=NULL;
     MY_MALLOC(ret, struct OrderP, 1);
     ret->isOk = isok;
-    ret->size = strlen(motpasse)+1;
     if(ret->isOk)
-    {
-        MY_MALLOC(ret->motpasse, char, ret->size);
-        strcpy(ret->motpasse, motpasse);
-    }
+        ret->motpasse=motpasse;
     return ret;
 }
 
@@ -40,15 +35,13 @@ bool isItOk(Order self)
     return self->isOk;
 }
 
-char * getMotpasse(Order self)
+int getMotpasse(Order self)
 {
     return self->motpasse;
 }
 
 void destroy_Order(Order * pself)
 {
-    if((*pself)->isOk)
-        MY_FREE((*pself)->motpasse);
     MY_FREE(*pself);
 }
 
@@ -56,13 +49,7 @@ void OrderOrchestreToService(int fdWrite,  Order order) // ##true : ordre favora
 {
     write(fdWrite, &(order->isOk), sizeof(int));
     if(order->isOk)
-    {
-        int size;
-
-        size = order->size;
-        write(fdWrite, &size, sizeof(int));
-        write(fdWrite, order->motpasse, size*sizeof(char));
-    }
+        write(fdWrite, order->motpasse, sizeof(int));
     close(fdWrite);
 }
 
@@ -73,11 +60,7 @@ Order getOrderFromOrchestre(int fdRead)
     MY_MALLOC(order, struct OrderP, 1);
     read(fdRead, &(order->isOk), sizeof(bool));
     if(order->isOk)
-    {
-        read(fdRead, &(order->size), sizeof(int));
-        MY_MALLOC(order->motpasse, char, order->size);
-        read(fdRead, &(order->motpasse), (order->size) * sizeof(char));
-    }
+        read(fdRead, &(order->motpasse), sizeof(int));
     close(fdRead);
     return order;
 }
