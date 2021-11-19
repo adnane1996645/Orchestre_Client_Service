@@ -2,13 +2,19 @@
 #include "myassert.h"
 #include "client_service.h"
 
-#define OK_PWD "CORRECT PASSWORD"
-#define WRONG_PWD "INCORRECT PASSWORD"
 
 
-
-int getPWDFromClient(int fdclientToService)
+bool getPWDFromClient(int fdRead, int PwD)
 {
       int pwd;
-      read(fdclientToService, &pwd, sizeof(int));
+      read(fdRead, &pwd, sizeof(int));
+      return (pwd==PwD);
+}
+
+void sendReponsePWD(int fdWrite, bool isOK)
+{
+     if(isOk)
+          write(fdWrite, &OK_PWD, sizeof(int));
+     else
+          write(fdWrite, &WRONG_PWD, sizeof(int));
 }

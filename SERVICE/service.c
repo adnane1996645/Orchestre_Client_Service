@@ -50,26 +50,30 @@ int main(int argc, char * argv[])
               break;            //code de fin => sortie de la boucle
         else
         {
-            char * passeword = strdup(getMotpasse(order));    //réception du mot de passe de l'orchestre
+            int passeword = getMotpasse(order);    //réception du mot de passe de l'orchestre
 
             fdServiceToClient = open(argv[3], O_WRONLY, 0644);     //ouverture des deux tubes nommés avec le client
             fdClientToService = open(argv[4], O_RDONLY, 0644);
-
+            bool condition = getPWDFromClient(fdClientToService, passeword);
             //    si mot de passe incorrect
-              
-            //        envoi au client d'un code d'erreur
-            //    sinon
-            //        envoi au client d'un code d'acceptation
-            //        appel de la fonction de communication avec le client :
-            //            une fct par service selon numService (cf. argv[1]) :
-            //                   . service_somme
-            //                ou . service_compression
-            //                ou . service_maximum
-            //        attente de l'accusé de réception du client
-            //    finsi
-            //    fermeture ici des deux tubes nommés avec le client
-            //    modification du sémaphore pour prévenir l'orchestre de la fin
-            // finsi
+            if(condition)
+                  sendReponsePWD(fdServiceToClient, condition);
+            else
+            {
+              //        envoi au client d'un code d'erreur
+              //    sinon
+              //        envoi au client d'un code d'acceptation
+              //        appel de la fonction de communication avec le client :
+              //            une fct par service selon numService (cf. argv[1]) :
+              //                   . service_somme
+              //                ou . service_compression
+              //                ou . service_maximum
+              //        attente de l'accusé de réception du client
+              //    finsi
+              //    fermeture ici des deux tubes nommés avec le client
+              //    modification du sémaphore pour prévenir l'orchestre de la fin
+              // finsi
+            }
         }
 
     }

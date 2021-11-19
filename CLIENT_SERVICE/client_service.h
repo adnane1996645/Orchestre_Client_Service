@@ -3,8 +3,12 @@
 
 // Ici toutes les communications entre les services et les clients :
 // - les deux tubes nommés pour la communication bidirectionnelle
-typedef struct PassWordP * PassWord;
 
+#define OK_PWD "CORRECT PASSWORD"
+#define WRONG_PWD "INCORRECT PASSWORD"
+
+bool getPWDFromClient(int fdClientToService);
+void sendReponsePWD(int fdSeviceToClient, bool isOK);
 
 
 #endif
