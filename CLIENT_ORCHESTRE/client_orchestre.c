@@ -12,7 +12,7 @@
 struct AskServicesP{
   bool isOk;
   int Service;
-}
+};
 
 void creat_named_pipes(){
   int ret = mkfifo("../pipe_o2c",0641); //chemin relatif
@@ -24,13 +24,13 @@ void creat_named_pipes(){
 int creat_mutex(){
   key_t key = ftok(CLIENT_ORCHESTRE, PROJ_ID);
   assert(key != -1);
-  
+
   int semid = semget(key, 1, IPC_CREAT | IPC_EXCL | 0641);
   assert(semid != -1);
-  
+
   int ret = semctl(semid, 0, SETVAL, 1);
   assert(ret != -1);
-  
+
   return semid;
 }
 
