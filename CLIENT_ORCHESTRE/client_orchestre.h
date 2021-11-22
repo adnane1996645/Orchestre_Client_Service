@@ -15,11 +15,19 @@ struct AskServicesP;
 typedef struct AskServicesP *AskServices;
 typedef const struct AskServicesP *constAskServices;
 
+struct ComP;
+typedef struct ComP *ComP;
+typedef const struct ComP *constComP;
+
 void creat_named_pipe();//c'est l'orchestre qui creer
 int creat_mutex();
 void v_mutex(int semid);
 void p_mutex(int semid);
+AskServices init_Ask(bool isok, const int service)
 void AskClientToOrchestre(int fdWrite, int service);
 int getAskFromClient(int fdRead);
+bool getOk(AskServices self);
+int getService(AskServices self);
+void destroy_Ask(AskServices *pself);
 
 #endif
