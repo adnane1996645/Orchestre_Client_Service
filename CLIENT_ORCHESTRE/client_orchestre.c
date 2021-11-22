@@ -86,5 +86,3 @@ bool getOk(AskServices self){
 void destroy_Ask(AskServices *pself){
   MY_FREE(*pself);
 }
-
-
