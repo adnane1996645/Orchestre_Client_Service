@@ -20,14 +20,17 @@ typedef struct ComP *Com;
 typedef const struct ComP *constCom;
 
 void creat_named_pipe();//c'est l'orchestre qui creer
-int creat_mutex();
-void v_mutex(int semid);
-void p_mutex(int semid);
+Com init_Com(int num_service, int mdp);
+
 AskServices init_Ask(bool isok, const int service)
 void AskClientToOrchestre(int fdWrite, int service);
 int getAskFromClient(int fdRead);
 bool getOk(AskServices self);
 int getService(AskServices self);
 void destroy_Ask(AskServices *pself);
+
+int creat_mutex();
+void v_mutex(int semid);
+void p_mutex(int semid);
 
 #endif
