@@ -16,8 +16,8 @@ typedef struct AskServicesP *AskServices;
 typedef const struct AskServicesP *constAskServices;
 
 struct ComP;
-typedef struct ComP *ComP;
-typedef const struct ComP *constComP;
+typedef struct ComP *Com;
+typedef const struct ComP *constCom;
 
 void creat_named_pipe();//c'est l'orchestre qui creer
 int creat_mutex();
