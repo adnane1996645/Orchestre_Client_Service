@@ -20,9 +20,9 @@ typedef struct ComP *Com;
 typedef const struct ComP *constCom;
 
 void creat_named_pipe();//c'est l'orchestre qui creer
-Com init_Com(int num_service, int mdp);
+Com init_com(int num_service, int mdp);
+void send_com(constCom c);
 
-AskServices init_Ask(bool isok, const int service)
 void AskClientToOrchestre(int fdWrite, int service);
 int getAskFromClient(int fdRead);
 bool getOk(AskServices self);

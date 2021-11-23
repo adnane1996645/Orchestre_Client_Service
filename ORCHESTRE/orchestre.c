@@ -90,7 +90,7 @@ int main(int argc, char * argv[])
   // envoi à chaque service d'un code de fin
   
   // attente de la terminaison des processus services
-  
+  // 3 wait(NULL);
   // libération des ressources
   
   return EXIT_SUCCESS;
