@@ -20,6 +20,8 @@ typedef struct ComP *Com;
 typedef const struct ComP *constCom;
 
 void creat_named_pipe();//c'est l'orchestre qui creer
+void open_pipes_c();//coté client
+void open_pipes_o();//coté orchestre
 Com init_com(int num_service, int mdp);
 void send_com(constCom c);
 
