@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include "myassert.h"
 #include "config.h"
-#include <memory.h>
+#include "memory.h"
 #include <stdbool.h>
 #include <string.h>
 
@@ -41,6 +41,7 @@ struct Config
     bool configExit_is_notCalled;
 
 };
+
 struct Config config = {0,NULL,NULL,NULL,true,true};
 
 void config_init(const char *filename)
