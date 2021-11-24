@@ -26,22 +26,31 @@ void creat_named_pipes(){
   assert(ret != -1);
 }
 
-void open_pipes_c(){ //coté client
-  int fd = open("../pipe_o2c", O_RDONLY);
+int * open_pipes_c(){ //coté client
+  int fd[2];
+  fd[0]= open("../pipe_o2c", O_RDONLY);//lecture
   assert(fd != -1);
-  fd = open("../pipe_c2o", O_WRONLY);
-  assert(fd != -1);
-}
-
-void open_pipes_o(){ //coté orchestre
-  int fd = open("../pipe_c2o", O_RDONLY);
-  assert(fd != -1);
-  fd = open("../pipe_o2c", O_WRONLY);
+  fd[1] = open("../pipe_c2o", O_WRONLY);//ecriture
   assert(fd != -1);
 }
 
+int * open_pipes_o(){ //coté orchestre
+  int fd[2];
+  fd[0] = open("../pipe_c2o", O_RDONLY);
+  assert(fd != -1);
+  fd[1] = open("../pipe_o2c", O_WRONLY);
+  assert(fd != -1);
+}
 
-Com init_com(int num_service, int mdp){ //initialisation communication services-client (o2c)
+void close_pipe(int *fd){ // un tableau de 2 entier dois etre passé en parametre
+  int ret = close(fd[0]);
+  assert(ret != -1);
+  ret = close(fd[1]);
+  assert(ret != -1);
+}
+
+
+Com init_com(int num_service, int mdp){//initialisation communication services-client(o2c)(crée les tubes en meme temps)
   Com c;
   char a[1];
   int ret;
@@ -74,6 +83,14 @@ void send_com(int fdWrite, constCom c){
   assert(ret != -1);
 }
 
+Com rcv_com(int fdRead){//recevoir le nom des tube et mdp pour la com service client
+  Com c;
+  int ret = read(fd,&c,sizeof(int));
+  assert(ret != -1);
+
+  return c;
+}
+
 void destroy_com(Com *pself){
   Com self = *pself;
   
@@ -83,6 +100,16 @@ void destroy_com(Com *pself){
   *pself = NULL;
 }
 
+int getPwd(constCom c){
+  return c->mdp;
+}
+
+int getPipe(constCom c, int n){
+  return c->service;
+}
+
+
+ ////////////////////////////////////////////////////////////////////////////////
 
 void AskClientToOrchestre(int fdWrite, int service){
   AskServices ask;
@@ -93,10 +120,12 @@ void AskClientToOrchestre(int fdWrite, int service){
   assert(ret != -1);
 }
 
-int getAskFromClient(int fdRead){
-  int ask_services;
+AskServices getAskFromClient(int fdRead){
+  AskServices ask_services;
   int ret = read(fd,&ask_services,sizeof(int));
   assert(ret != -1);
+
+  return ask_services;
 }
 
 int getService(AskServices self){
