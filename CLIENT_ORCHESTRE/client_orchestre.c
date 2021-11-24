@@ -1,4 +1,5 @@
 #define _XOPEN_SOURCE
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <sys/types.h>
@@ -42,7 +43,7 @@ int * open_pipes_o(){ //coté orchestre
   assert(fd != -1);
 }
 
-void close_pipe(int *fd){ // un tableau de 2 entier dois etre passé en parametre
+void close_pipes(int *fd){ // un tableau de 2 entier dois etre passé en parametre
   int ret = close(fd[0]);
   assert(ret != -1);
   ret = close(fd[1]);
@@ -104,8 +105,12 @@ int getPwd(constCom c){
   return c->mdp;
 }
 
-int getPipe(constCom c, int n){
-  return c->service;
+char * getPipe(constCom c, int n){
+  if(n == 1)
+    return c->tube1;
+  else if(n == 2)
+    return c->tube2;
+  else return EXIT_FAILURE;
 }
 
 
