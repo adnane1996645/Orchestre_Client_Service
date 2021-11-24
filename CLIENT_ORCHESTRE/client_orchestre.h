@@ -11,9 +11,11 @@
 // identifiant pour le deuxième paramètre de ftok
 #define PROJ_ID 5
 
+/*
 struct AskServicesP;
 typedef struct AskServicesP *AskServices;
 typedef const struct AskServicesP *constAskServices;
+*/
 
 struct ComP;
 typedef struct ComP *Com;
@@ -31,13 +33,21 @@ void destroy_com(Com *pself);
 int getPwd(constCom c);
 char * getPipe(constCom c, int n);
 
-void AskClientToOrchestre(int fdWrite, int service);
+void send_request(int fdWrite, int service);
+int rcv_request(int fdRead);
+void send_reply(int fdWrite, bool r);
+bool rcv_reply(int fdRead);
+
+/*
+void send_Ask(int fdWrite, int service);
 AskServices getAskFromClient(int fdRead);
+void destroy_Ask(AskServices *pself);
 bool getOk(AskServices self);
 int getService(AskServices self);
-void destroy_Ask(AskServices *pself);
+*/
 
 int creat_mutex();
+int recup_mutex();
 void v_mutex(int semid);
 void p_mutex(int semid);
 void destroy_mutex(int semid);
