@@ -12,7 +12,6 @@
 #include <unistd.h>
 #include <pthread.h>
 #include "service_maximum.h"
-#
 
 //#include "service_maximum.h"
 
@@ -43,30 +42,9 @@ typedef struct
 
 
 /***********************************************/
-
-static ThreadData* createThreadDatas(Data d)
-{
-    pthread_mutex_t mux = PTHREAD_MUTEX_INITIALIZER;
-    ThreadData* datas = (ThreadData*)malloc(sizeof(ThreadData) * NB_THREADS);
-    int intervalLength = d->length/NB_THREADS;
-    for (int i = 0; i < NB_THREADS ; i++){
-        datas[i].max = &(d->max) ;
-        datas[i].arr = d->TAB;
-        datas[i].start = i * intervalLength;
-        printf("start %d\n", datas[i].start);
-        datas[i].end = (i+1) * intervalLength -1;
-        datas[i].mux = mux;
-    }
-    datas[NB_THREADS - 1].end += (d->length % NB_THREADS);
-    printf("%d\n", datas[NB_THREADS - 1].end);
-    return datas;
-}
-
-/***********************************************/
-
 // Fonction support d'un thread
 // Tous les threads lanceront cette fonction
-void * codeThread(void * arg)
+void * routine(void * arg)
 {
     ThreadData *data = (ThreadData *) arg;
     float max = -FLT_MAX;
@@ -88,9 +66,23 @@ void * codeThread(void * arg)
     return NULL;
 }
 
-/***********************************************/
-
-
+ThreadData* createThreadDatas(Data d)
+{
+    pthread_mutex_t mux = PTHREAD_MUTEX_INITIALIZER;
+    ThreadData* datas = (ThreadData*)malloc(sizeof(ThreadData) * NB_THREADS);
+    int intervalLength = d->length/NB_THREADS;
+    for (int i = 0; i < NB_THREADS ; i++){
+        datas[i].max = &(d->max) ;
+        datas[i].arr = d->TAB;
+        datas[i].start = i * intervalLength;
+        printf("start %d\n", datas[i].start);
+        datas[i].end = (i+1) * intervalLength -1;
+        datas[i].mux = mux;
+    }
+    datas[NB_THREADS - 1].end += (d->length % NB_THREADS);
+    printf("%d\n", datas[NB_THREADS - 1].end);
+    return datas;
+}
 
 /***********************************************/
 
@@ -102,7 +94,7 @@ static void computeResult(Data d)
     // lancement des threads
     for (int i = 0; i < NB_THREADS; i++)
     {
-        int ret = pthread_create(&(tabId[i]), NULL, codeThread, &(datas[i]));
+        int ret = pthread_create(&(tabId[i]), NULL, routine, &(datas[i]));
         assert(ret == 0);
     }
     // attente de la fin des threads

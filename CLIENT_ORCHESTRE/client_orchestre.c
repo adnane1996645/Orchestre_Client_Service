@@ -1,4 +1,5 @@
 #define _XOPEN_SOURCE
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <sys/types.h>
@@ -8,12 +9,12 @@
 #include "memory.h"
 #include "client_orchestre.h"
 
-
+/*
 struct AskServicesP{//demande effectué par un client à l'orchestre pour le service souhaité
   bool isOk;  //reponse de l'orchestre (true si l'orchestre accepte)
   int service; //numéro du service souhaité
 };
-
+*/
 struct ComP{//pour la communication client_service
   int mdp; //motdepass envoyé par l'orchestre au client pour qu'il puisse valider ses communications avec le service
   char *tube1, *tube2; //nom des tubes par les quels vont transiter les comms entre le client et le service
@@ -26,22 +27,31 @@ void creat_named_pipes(){
   assert(ret != -1);
 }
 
-void open_pipes_c(){ //coté client
-  int fd = open("../pipe_o2c", O_RDONLY);
+int * open_pipes_c(){ //coté client
+  int fd[2];
+  fd[0]= open("../pipe_o2c", O_RDONLY);//lecture
   assert(fd != -1);
-  fd = open("../pipe_c2o", O_WRONLY);
-  assert(fd != -1);
-}
-
-void open_pipes_o(){ //coté orchestre
-  int fd = open("../pipe_c2o", O_RDONLY);
-  assert(fd != -1);
-  fd = open("../pipe_o2c", O_WRONLY);
+  fd[1] = open("../pipe_c2o", O_WRONLY);//ecriture
   assert(fd != -1);
 }
 
+int * open_pipes_o(){ //coté orchestre
+  int fd[2];
+  fd[0] = open("../pipe_c2o", O_RDONLY);
+  assert(fd != -1);
+  fd[1] = open("../pipe_o2c", O_WRONLY);
+  assert(fd != -1);
+}
 
-Com init_com(int num_service, int mdp){ //initialisation communication services-client (o2c)
+void close_pipes(int *fd){ // un tableau de 2 entier dois etre passé en parametre
+  int ret = close(fd[0]);
+  assert(ret != -1);
+  ret = close(fd[1]);
+  assert(ret != -1);
+}
+
+
+Com init_com(int num_service, int mdp){//initialisation communication services-client(o2c)(crée les tubes en meme temps)
   Com c;
   char a[1];
   int ret;
@@ -74,17 +84,66 @@ void send_com(int fdWrite, constCom c){
   assert(ret != -1);
 }
 
+Com rcv_com(int fdRead){//recevoir le nom des tube et mdp pour la com service client
+  Com c;
+  int ret = read(fd,&c,sizeof(int));
+  assert(ret != -1);
+
+  return c;
+}
+
 void destroy_com(Com *pself){
   Com self = *pself;
   
   MY_FREE(self);
   MY_FREE(self->tube1);
   MY_FREE(self->tube2);
-  *pself = NULL;
+}
+
+int getPwd(constCom c){
+  return c->mdp;
+}
+
+char * getPipe(constCom c, int n){
+  if(n == 1)
+    return c->tube1;
+  else if(n == 2)
+    return c->tube2;
+  else return EXIT_FAILURE;
 }
 
 
-void AskClientToOrchestre(int fdWrite, int service){
+////////requete et réponse pour la demande d'un service/////////
+
+void send_request(int fdWrite, int service){ // coté client
+  int ret = write(fdWrite, &(service), sizeof(int));
+  assert(ret != -1);
+}
+
+int rcv_request(int fdRead){ // coté orchestre
+  int ask;
+  int ret = read(fd,&ask,sizeof(int));
+  assert(ret != -1);
+
+  return ask;
+}
+
+void send_reply(int fdWrite, bool r){ // coté orchestre
+  int ret = write(fdWrite, &(r), sizeof(bool));
+  assert(ret != -1);
+}
+
+bool rcv_reply(int fdRead){ // coté client
+  int r;
+  int ret = read(fd,&r,sizeof(bool));
+  assert(ret != -1);
+
+  return r;
+}
+
+//probablement inutile donc voir pour suppression
+/*
+void send_Ask(int fdWrite, int service){
   AskServices ask;
   MY_MALLOC(ask, struct AskServicesP, 1);
   ask->isOk = false;
@@ -93,10 +152,12 @@ void AskClientToOrchestre(int fdWrite, int service){
   assert(ret != -1);
 }
 
-int getAskFromClient(int fdRead){
-  int ask_services;
+AskServices getAskFromClient(int fdRead){
+  AskServices ask_services;
   int ret = read(fd,&ask_services,sizeof(int));
   assert(ret != -1);
+
+  return ask_services;
 }
 
 int getService(AskServices self){
@@ -110,9 +171,9 @@ bool getOk(AskServices self){
 void destroy_Ask(AskServices *pself){
   MY_FREE(*pself);
 }
+*/
 
-
-////mutex////
+//////////mutex//////////
 
 int creat_mutex(){
   key_t key = ftok(CLIENT_ORCHESTRE, PROJ_ID);
@@ -123,6 +184,16 @@ int creat_mutex(){
   
   int ret = semctl(semid, 0, SETVAL, 1);//1 pour imiter un mutex
   assert(ret != -1);
+  
+  return semid;
+}
+
+int recup_mutex(){//c'est une erreur d'appeler cette fonction si le mutex n'a pas été créé préalablement
+  key_t key = ftok(CLIENT_ORCHESTRE, PROJ_ID);
+  assert(key != -1);
+  
+  int semid = semget(key, 1, 0); // 0 pour récupérer l'id d'un semaphore existant
+  assert(semid != -1);
   
   return semid;
 }
