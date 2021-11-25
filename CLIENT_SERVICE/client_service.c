@@ -18,3 +18,19 @@ void sendReponsePWD(int fdWrite, bool isOK)
      else
           write(fdWrite, &WRONG_PWD, sizeof(int));
 }
+
+void sendChaineToService(char * chaine, int fdWrite)
+{
+    int length = strlen(chaine)+1;
+    write(fdWritre, &length, sizeof(int));
+    write(fdWrite, chaine, length * sizeof(char));
+}
+
+char * getChainefromService(int fdRead)
+{
+    int length;
+    read(fdRead, &length, sizeof(int));
+    char * chaineResult = (char *) malloc(length * sizeof(char));
+    read(fdWrite, chaineResult, length * sizeof(char));
+    return chaineResult;
+}
