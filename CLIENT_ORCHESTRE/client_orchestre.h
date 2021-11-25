@@ -27,7 +27,7 @@ int * open_pipes_o();//coté orchestre
 void close_pipes(int *fd);
 
 Com init_com(int num_service, int mdp);//crée la structure contenant le nom des tube et le mdp à envoyer au client 
-void send_com(constCom c);
+void send_com(int fdWrite, constCom c);
 Com rcv_com(int fdRead);
 void destroy_com(Com *pself);
 int getPwd(constCom c);
