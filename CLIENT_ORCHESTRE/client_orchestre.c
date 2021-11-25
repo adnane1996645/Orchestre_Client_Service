@@ -1,8 +1,11 @@
-#define _XOPEN_SOURCE
+#define _XOPEN_SOURCE 700
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <assert.h>
@@ -28,19 +31,25 @@ void creat_named_pipes(){
 }
 
 int * open_pipes_c(){ //coté client
-  int fd[2];
+  int *fd;
+  MY_MALLOC(fd, int, 2);
   fd[0]= open("../pipe_o2c", O_RDONLY);//lecture
-  assert(fd != -1);
+  assert(fd[0] != -1);
   fd[1] = open("../pipe_c2o", O_WRONLY);//ecriture
-  assert(fd != -1);
+  assert(fd[1] != -1);
+
+  return fd;
 }
 
 int * open_pipes_o(){ //coté orchestre
-  int fd[2];
+  int *fd;
+  MY_MALLOC(fd, int, 2);
   fd[0] = open("../pipe_c2o", O_RDONLY);
-  assert(fd != -1);
+  assert(fd[0] != -1);
   fd[1] = open("../pipe_o2c", O_WRONLY);
-  assert(fd != -1);
+  assert(fd[1] != -1);
+
+  return fd;
 }
 
 void close_pipes(int *fd){ // un tableau de 2 entier dois etre passé en parametre
@@ -53,10 +62,10 @@ void close_pipes(int *fd){ // un tableau de 2 entier dois etre passé en paramet
 
 Com init_com(int num_service, int mdp){//initialisation communication services-client(o2c)(crée les tubes en meme temps)
   Com c;
-  char a[1];
+  char *a;
   int ret;
   
-  MY_MALLOC(c, struct ComP, 1);
+  MY_MALLOC(c, (struct ComP), 1);
   c->mdp = mdp;
   
   int len = strlen("../pipe_s2c_1");
@@ -86,7 +95,7 @@ void send_com(int fdWrite, constCom c){
 
 Com rcv_com(int fdRead){//recevoir le nom des tube et mdp pour la com service client
   Com c;
-  int ret = read(fd,&c,sizeof(int));
+  int ret = read(fdRead,&c,sizeof(int));
   assert(ret != -1);
 
   return c;
@@ -109,7 +118,7 @@ char * getPipe(constCom c, int n){
     return c->tube1;
   else if(n == 2)
     return c->tube2;
-  else return EXIT_FAILURE;
+  else return NULL;//exit();
 }
 
 
@@ -122,7 +131,7 @@ void send_request(int fdWrite, int service){ // coté client
 
 int rcv_request(int fdRead){ // coté orchestre
   int ask;
-  int ret = read(fd,&ask,sizeof(int));
+  int ret = read(fdRead,&ask,sizeof(int));
   assert(ret != -1);
 
   return ask;
@@ -135,7 +144,7 @@ void send_reply(int fdWrite, bool r){ // coté orchestre
 
 bool rcv_reply(int fdRead){ // coté client
   int r;
-  int ret = read(fd,&r,sizeof(bool));
+  int ret = read(fdRead,&r,sizeof(bool));
   assert(ret != -1);
 
   return r;
