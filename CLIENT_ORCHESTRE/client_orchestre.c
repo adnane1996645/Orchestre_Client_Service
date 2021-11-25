@@ -8,8 +8,9 @@
 #include <fcntl.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
+#include <string.h>
 #include <assert.h>
-#include "memory.h"
+#include "../UTILS/memory.h"
 #include "client_orchestre.h"
 
 /*
@@ -65,7 +66,8 @@ Com init_com(int num_service, int mdp){//initialisation communication services-c
   char *a;
   int ret;
   
-  MY_MALLOC(c, (struct ComP), 1);
+  MY_MALLOC(c, struct ComP, 1);
+  MY_MALLOC(a, char, 1);
   c->mdp = mdp;
   
   int len = strlen("../pipe_s2c_1");
