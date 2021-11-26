@@ -30,10 +30,8 @@ typedef struct DataP * Data;
 static void receiveData(int fdRead, Data data)
 {
     read(fdRead, &(data->lstr), sizeof(int));
-    data->str = malloc((data->lstr) * sizeof(char));
-    for(int i =0; i< data->lstr; i++)
-      read(fdRead, data->str+i, sizeof(char));
-    printf("receiveData");
+    data->str = (char *)malloc(sizeof(char) * data->lstr);
+      read(fdRead, data->str, sizeof(char) * data->lstr);
 }
 
 // fonction de traitement des données
@@ -46,13 +44,17 @@ static void computeResult(Data data)
     int debut = 1;
     int iter = 0;
 
+    /*for(int j=0; j<data->lstr-1; j++)
+        printf("%d|%c\n", j, data->str[j]);*/
     data->dest =malloc(sizeof(char));
     while(currChar != '\0')
     {
         for(int i=debut; i<longueur; i++)
         {
             if(currChar==data->str[i])
-                  occChar++;
+            {
+                occChar++;
+            }
             else
             {
                 length+=2;
@@ -75,8 +77,7 @@ static void computeResult(Data data)
 static void sendResult(int fdWrite, Data data)
 {
     write(fdWrite, &(data->ldest), sizeof(int));
-    for(int i =0; i<data->ldest; i++)
-        write(fdWrite, data->dest+i, sizeof(char));
+    write(fdWrite, data->dest, sizeof(char) * data->ldest);
 }
 
 
@@ -88,18 +89,20 @@ void service_compression(int fdRead, int fdWrite)
     // initialisations diverses
     Data data = malloc(sizeof(struct DataP));
     receiveData(fdRead, data);
+    printf("%s\n", data->str);
     computeResult(data);
+    printf("%s\n", data->dest);
     sendResult(fdWrite, data);
     // libération éventuelle de ressources
-    printf("%s\n",data->dest);
+    //printf("%s\n",data->dest);
     free(data->str);
     free(data->dest);
     free(data);
 }
 /*int main()
-{
-    char * chaine = "cccccchhhhttatttttt";
-    int fd = open("info", O_CREAT | O_RDWR, 0644);
+{*/
+    /*char * chaine = "cccchhhhttatttttt";
+    int fd = open("info", O_CREAT | O_WRONLY, 0644);
     int ret=0;
     int l = strlen(chaine)+1;
     assert(fd !=-1);
@@ -110,34 +113,43 @@ void service_compression(int fdRead, int fdWrite)
     }
     close(fd);
     int fd1 = open("info", O_RDONLY, 0644);
-    Data data = malloc(sizeof(struct DataP));
-    receiveData(fd1, data);
-    printf("%s\n",data->str);
+    int fd2 = open("info2", O_CREAT | O_WRONLY, 0644);
+    service_compression(fd1, fd2);
     close(fd1);
-    computeResult(data);
-    int fd2 = open("info", O_WRONLY, 0644);
-    sendResult(fd2, data);
     close(fd2);
+
+    int fd3 = open("info2", O_RDONLY, 0644);
+    int l1;
+    read(fd3, &l1, sizeof(int));
+    char * chaine1 = malloc(sizeof(char) * l1);
+    read(fd3, chaine1, sizeof(char) * l1);
+    close(fd3);
+
+    printf("%s  %s\n",chaine, chaine1);*/
+    //Data data = malloc(sizeof(struct DataP));
+
+
+    /*
+    char * chaine = "cchhhhttatttttt";
+    int fd = open("info", O_CREAT | O_WRONLY, 0644);
+    int l = strlen(chaine)+1;
+    assert(fd !=-1);
+    write(fd, &l, sizeof(int));
+    write(fd, chaine, sizeof(char) * l);
+    close(fd);
+    int fd1 = open("info", O_RDONLY, 0644);
+    int fd2 = open("info2", O_CREAT | O_WRONLY, 0644);
+    service_compression(fd1, fd2);
     // libération éventuelle de ressources
     //printf("%s\n",data->dest);
-    free(data->str);
-    free(data->dest);
-    free(data);*/
-
-    /*fd = open("info", O_CREAT | O_RDWR, 0644);
-    int longueur;
-    read(fd, &longueur, sizeof(int));
-    char * c = malloc(longueur*sizeof(char));
-    for(int i =0; i<longueur; i++)
-      read(fd, c+i, sizeof(char));
-    printf("%s\n", c);
-    close(fd);*/
-
-    /*Data data = malloc(sizeof(struct DataP));
-    data->str = "cccccchhhhttatttttt";
-    data->lstr = strlen(data->str)+1;
-    computeResult(data);
-    printf("%s %d\n", data->dest, data->ldest);*/
-
+    close(fd1);
+    close(fd2);
+    int fd3 = open("info2", O_RDONLY, 0644);
+    int l3;
+    read(fd3, &l3, sizeof(int));
+    char * c3 = malloc(sizeof(char) * l3);
+    read(fd3, c3, sizeof(char) * l3);
+    printf("%s %d\n", c3, l3);
+    free(c3);
     return EXIT_SUCCESS;
-}
+}*/
