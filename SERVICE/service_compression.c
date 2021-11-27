@@ -3,10 +3,10 @@
 #include <stdbool.h>
 #include <string.h>
 #include <assert.h>
-/*#include "orchestre_service.h"
+#include "orchestre_service.h"
 #include "client_service.h"
 
-#include "service_compression.h"*/
+#include "service_compression.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -88,6 +88,7 @@ void service_compression(int fdRead, int fdWrite)
 {
     // initialisations diverses
     Data data = malloc(sizeof(struct DataP));
+    printf("        Service Compression ... :\n");
     receiveData(fdRead, data);
     printf("%s\n", data->str);
     computeResult(data);

@@ -6,8 +6,8 @@
 #include <assert.h>
 #include <float.h>
 
-//#include "orchestre_service.h"
-//#include "client_service.h"
+#include "orchestre_service.h"
+#include "client_service.h"
 #include <sys/types.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -130,6 +130,7 @@ void service_maximum(int fdClientToService, int fdServiceToClient)
 {
     // initialisations diverses
     Data data;
+    printf("        Service Maximum ... :\n");
     MY_MALLOC(data, struct DataP, 1);
     receiveData(fdClientToService, data);
     computeResult(data);

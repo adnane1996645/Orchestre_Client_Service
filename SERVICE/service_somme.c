@@ -48,7 +48,7 @@ void service_somme(int fdClientToService, int fdServiceToClient)
 {
     // initialisations diverses
     Data data = malloc(sizeof(struct DataP));
-
+    printf("        Service Somme ... :\n");
     receiveData(fdClientToService, data);
     computeResult(data);
     sendResult(fdServiceToClient);
