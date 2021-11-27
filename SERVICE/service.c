@@ -1,3 +1,7 @@
+/****************************************************************
+Bionôme :  - Adnane LAANANI
+           -
+*****************************************************************/
 #define  _XOPEN_SOURCE 700
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,13 +47,21 @@ int main(int argc, char * argv[])
     int fdServiceToClient;
     int fdClientToService;
     int Service = strtol(argv[1], NULL, 10);
-
-    if(Service < 0 || Service >= SERVICE_NB)
-        usage(argv[0], "Le numéro de service est invalide\n");
+    int cleSem = strtol(argv[2], NULL, 10);
 
     // initialisations diverses : analyse de argv
     fdServiceFromOrchestre = strtol(argv[2], NULL, 10);
+
     printf("SERVICE... :\n");
+    if(Service < SERVICE_ARRET || Service >= SERVICE_NB)
+        usage(argv[0], "Le numéro de service est invalide\n");
+
+    if(Service == SERVICE_ARRET)
+    {
+        printf("||\n||=>Arrêt du Service ...\n||\n||=>Fin!\n");
+        exit(EXIT_FAILURE);
+    }
+
     while (true)
     {
         // attente d'un code de l'orchestre (via tube anonyme)
@@ -57,12 +69,12 @@ int main(int argc, char * argv[])
         Order order = getOrderFromOrchestre(fdServiceFromOrchestre);
         if(!isItOk(order))
         {
-          printf("    L'ordre est un ordre de fin.\n");
+          printf("||\n||=>    L'ordre est un ordre de fin.\n");
                 break;        //code de fin => sortie de la boucle
         }
         else
         {
-            printf("    Reception du mot de passe de l'orchestre ... :\n");
+            printf("||\n||=>    Reception du mot de passe de l'orchestre ... :\n");
 
             int passeword = getMotpasse(order);    //réception du mot de passe de l'orchestre
 
@@ -74,43 +86,45 @@ int main(int argc, char * argv[])
             if(condition) //    si mot de passe incorrect
             {
               //        envoi au client d'un code d'erreur
-                    printf("      Mot de passe incorect : envoi au client un code d'erreur : %s\n", WRONG_PWD);
+                    printf(".\n.\n.\n      Mot de passe incorect : envoi au client un code d'erreur : %s\n", WRONG_PWD);
                     sendReponsePWD(fdServiceToClient, condition);
             }
             else  //    sinon
             {
               //        envoi au client d'un code d'acceptation
-                    printf("      Mot de passe correct : envoi au client un code d'acceptation : %s\n", OK_PWD);
+                    printf(".\n.\n.\n      Mot de passe correct : envoi au client un code d'acceptation : %s\n", OK_PWD);
                     sendReponsePWD(fdServiceToClient, condition);
                     switch(Service)
                     {
                        // appel de la fonction de communication avec le client :
                        //            une fct par service selon numService (cf. argv[1]) :
-                       case 0 :
+                       case SERVICE_SOMME :
                               service_somme(fdClientToService, fdServiceToClient);//. service_somme
                               break;
-                       case 1 :
+                       case SERVICE_COMPRESSION :
                               service_compression(fdClientToService, fdServiceToClient);//. service_compression
                               break;
-                       case 2 :
+                       case SERVICE_MAXIMUM :
                               service_maximum(fdClientToService, fdServiceToClient)//. service_maximum
                               break;
                        default :
-                              printf("        Le numéro de service est incorrect être entre 0 et %d\n", SERVICE_NB - 1);
+                              printf("        Le numéro de service est incorrect et doit être entre 0 et %d\n", SERVICE_NB - 1);
                               break;
                       }
                        //        attente de l'accusé de réception du client
-
+                       printf(".\n.\n.\n      En attente d'un accusé de réception du client ...: \n");
+                       getACR(fdClientToService);
                        //    finsi
               }
               //    fermeture ici des deux tubes nommés avec le client
               close(fdServiceToClient);
               close(fdClientToService);
               //    modification du sémaphore pour prévenir l'orchestre de la fin
+              int semId = mysemget(cleSem);
+              mysem_descre(semId);
               // finsi
           }
       }
-
     // libération éventuelle de ressources
     destroy_Order(&order)
 

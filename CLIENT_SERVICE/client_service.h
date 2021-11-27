@@ -6,6 +6,7 @@
 
 #define OK_PWD "CORRECT PASSWORD"
 #define WRONG_PWD "INCORRECT PASSWORD"
+#define ACR "RESULT OK"
 
 bool getPWDFromClient(int fdClientToService);
 void sendReponsePWD(int fdSeviceToClient, bool isOK);
