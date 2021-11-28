@@ -65,19 +65,26 @@ Order getOrderFromOrchestre(int fdRead)
     return order;
 }
 
-int mysemget(int numService)
+int mysemget_create(int pojid)
 {
-    int ret;
+    int semId;
     key_t key;
-    int pojid;
 
-    pojid=1+numService;
     key = ftok(ORCHESTRE_SERVICE, pojid);
-    myassert(key!=-1, "Erreur dans la création de la clé dans la fonction mysemget");
-    ret = semget(key, 1, IPC_CREAT | IPC_EXCL | 0641);
-    myassert(key!=-1, "Erreur dans la création du semaphore dans la fonction mysemget");
-    semctl(ret, 0, SETVAL, 1);
-    return ret;
+    myassert(key!=-1, "Erreur dans la création de la clé dans la fonction mysemget_create");
+    semId = semget(key, 1, IPC_CREAT | IPC_EXCL | 0641);
+    myassert(key!=-1, "Erreur dans la création du semaphore dans la fonction mysemget_create");
+    semctl(semId, 0, SETVAL, 1);
+    return semId;
+}
+
+int mysemget(int pojid)
+{
+    int semId;
+    key = ftok(ORCHESTRE_SERVICE, pojid);
+    semId = semget(key, 1, 0);
+    myassert(semId!=-1, "Erreur dans la récupération du semaphore dans la fonction mysemget");
+    return semId;
 }
 
 void mysem_descre(int semId)
@@ -96,6 +103,15 @@ void mysem_incre(int semId)
     struct sembuf opp = {0,1,0};
     ret = semop(semId, &opp, 1);
     myassert(ret != -1, "Erreur dans la incre du semophore Orchestre service");
+}
+
+void mysem_attente(int semId)
+{
+    int ret;
+
+    struct sembuf opp = {0,0,0};
+    ret = semop(semId, &opp, 1);
+    myassert(ret != -1, "Erreur dans l'attente du semophore Orchestre service");
 }
 
 void mysem_destroy(int semId)
