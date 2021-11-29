@@ -33,7 +33,7 @@ void client_maximum_verifArgs(int argc, char * argv[])
 {
     if (argc < 4)
         usage(argv[0], argv[1], "nombre d'arguments");
-    // éventuellement d'autres tests
+    
 }
 
 
@@ -47,9 +47,11 @@ void client_maximum_verifArgs(int argc, char * argv[])
 // - le file descriptor du tube de communication vers le service
 // - le nombre de threads que doit utiliser le service
 // - le tableau de float dont on veut le maximum
-static void sendData(/* fd_pipe_to_service,*/ /* nbre_threads, */ /* tableau_de_float_à_envoyer */)
+static void sendData(int fd_pipe_to_service , int nbre_threads, float * tab_float)
 {
-    // envoi du nombre de threads et du tableau de float
+  // envoi du nombre de threads et du tableau de float
+  write(fifofd,&nbre_threads,sizeof(int));
+  write(fifofd,&tab_float,sizeof(float *));
 }
 
 // ---------------------------------------------
@@ -57,10 +59,14 @@ static void sendData(/* fd_pipe_to_service,*/ /* nbre_threads, */ /* tableau_de_
 // Les paramètres sont
 // - le file descriptor du tube de communication en provenance du service
 // - autre chose si nécessaire
-static void receiveResult(/* fd_pipe_from_service,*/ /* autres paramètres si nécessaire */)
+static void receiveResult(int fd /* ,autres paramètres si nécessaire */)
 {
     // récupération du maximum
+  float res;
+  int ret = read(fd,&res,sizeof(float));
+  assert(ret != -1);
     // affichage du résultat
+  printf("resultat: %f\n",res);
 }
 
 
@@ -72,10 +78,15 @@ static void receiveResult(/* fd_pipe_from_service,*/ /* autres paramètres si n�
 // Cette fonction analyse argv et en déduit les données à envoyer
 //    - argv[2] : nombre de threads
 //    - argv[3] à argv[argc-1]: les nombres flottants
-void client_maximum(/* fd des tubes avec le service, */ int argc, char * argv[])
+void client_maximum(int fd1, int fd2, int argc, char * argv[])
 {
-    // variables locales éventuelles
-    sendData(/* paramètres */);
-    receiveResult(/* paramètres */);
+  // variables locales éventuelles
+  float tab[argc-4];
+  for(int i = 3; i <= argc-1; i++)
+    tab[i-3] = argv[i];
+
+  
+  sendData(fd1, argv[2], tab);
+  receiveResult(fd2);
 }
 

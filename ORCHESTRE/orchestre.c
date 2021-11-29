@@ -59,7 +59,7 @@ int main(int argc, char * argv[])
       // les sémaphores dédiés (attention on n'attend pas la
       // fin des traitement, on note juste ceux qui sont finis)
       
-      /*besoin de faire une fonction dans orchestre_service, i.e: bool * getserv_fin(int service); */
+      /*besoin de faire une fonction dans orchestre_service, i.e: bool * getserv_fin(int * servId); */
       if(semctl(semid[service], 0, GETVAL, 0) == 0)
 	serv_fini[service] = true;
       else serv_fini[service] = false;
