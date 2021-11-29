@@ -50,8 +50,10 @@ void client_maximum_verifArgs(int argc, char * argv[])
 static void sendData(int fd_pipe_to_service , int nbre_threads, float * tab_float)
 {
   // envoi du nombre de threads et du tableau de float
-  write(fifofd,&nbre_threads,sizeof(int));
-  write(fifofd,&tab_float,sizeof(float *));
+  int ret = write(fd_pipe_to_service, &nbre_threads, sizeof(int));
+  assert(ret != -1);
+  ret = write(fd_pipe_to_service, &tab_float, sizeof(float *));
+  assert(ret != -1);
 }
 
 // ---------------------------------------------

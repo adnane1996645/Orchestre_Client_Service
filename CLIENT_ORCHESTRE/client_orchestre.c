@@ -13,12 +13,7 @@
 #include "../UTILS/memory.h"
 #include "client_orchestre.h"
 
-/*
-struct AskServicesP{//demande effectué par un client à l'orchestre pour le service souhaité
-  bool isOk;  //reponse de l'orchestre (true si l'orchestre accepte)
-  int service; //numéro du service souhaité
-};
-*/
+
 struct ComP{//pour la communication client_service
   int mdp; //motdepass envoyé par l'orchestre au client pour qu'il puisse valider ses communications avec le service
   char *tube1, *tube2; //nom des tubes par les quels vont transiter les comms entre le client et le service
@@ -61,6 +56,8 @@ void close_pipes(int *fd){ // un tableau de 2 entier dois etre passé en paramet
 }
 
 
+/////COMMUNICATION d'une structure/////
+
 Com init_com(int num_service, int mdp){//initialisation communication services-client(o2c)(crée les tubes en meme temps)
   Com c;
   char *a;
@@ -91,7 +88,7 @@ Com init_com(int num_service, int mdp){//initialisation communication services-c
 
 
 void send_com(int fdWrite, constCom c){
-  int ret = write(fdWrite, &(c), sizeof(int));
+  int ret = write(fdWrite, &c, sizeof(int));
   assert(ret != -1);
 }
 
@@ -127,7 +124,7 @@ char * getPipe(constCom c, int n){
 ////////requete et réponse pour la demande d'un service/////////
 
 void send_request(int fdWrite, int service){ // coté client
-  int ret = write(fdWrite, &(service), sizeof(int));
+  int ret = write(fdWrite, &service, sizeof(int));
   assert(ret != -1);
 }
 
@@ -140,49 +137,33 @@ int rcv_request(int fdRead){ // coté orchestre
 }
 
 void send_reply(int fdWrite, bool r){ // coté orchestre
-  int ret = write(fdWrite, &(r), sizeof(bool));
+  int ret = write(fdWrite, &r, sizeof(bool));
   assert(ret != -1);
 }
 
 bool rcv_reply(int fdRead){ // coté client
-  int r;
+  bool r;
   int ret = read(fdRead,&r,sizeof(bool));
   assert(ret != -1);
 
   return r;
 }
 
-//probablement inutile donc voir pour suppression
-/*
-void send_Ask(int fdWrite, int service){
-  AskServices ask;
-  MY_MALLOC(ask, struct AskServicesP, 1);
-  ask->isOk = false;
-  ask->service = service;
-  int ret = write(fdWrite, &(ask), sizeof(int));
+void send_adc(int fdWrite){ // coté client
+  int r = ADC;
+  int ret = write(fdWrite, &r, sizeof(int));
   assert(ret != -1);
 }
 
-AskServices getAskFromClient(int fdRead){
-  AskServices ask_services;
-  int ret = read(fd,&ask_services,sizeof(int));
+void rcv_adc(int fdRead){ // coté orchestre
+  int r;
+  int ret = read(fdRead,&r,sizeof(int));
   assert(ret != -1);
 
-  return ask_services;
+
 }
 
-int getService(AskServices self){
-  return self->service;
-}
 
-bool getOk(AskServices self){
-  return self->isOk;
-}
-
-void destroy_Ask(AskServices *pself){
-  MY_FREE(*pself);
-}
-*/
 
 //////////mutex//////////
 

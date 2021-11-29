@@ -94,7 +94,8 @@ int main(int argc, char * argv[])
       // finsi
       
       // attente d'un accusé de réception du client
-      
+      rcv_adc(fd[0]);
+
       // fermer les tubes vers le client
 
       

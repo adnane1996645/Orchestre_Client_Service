@@ -10,12 +10,8 @@
 
 // identifiant pour le deuxième paramètre de ftok
 #define PROJ_ID 5
-
-/*
-struct AskServicesP;
-typedef struct AskServicesP *AskServices;
-typedef const struct AskServicesP *constAskServices;
-*/
+//code de l'accusé de réception (code de fin de communication)
+#define ADC 144
 
 struct ComP;
 typedef struct ComP *Com;
@@ -33,18 +29,14 @@ void destroy_com(Com *pself);
 int getPwd(constCom c);
 char * getPipe(constCom c, int n);
 
+
 void send_request(int fdWrite, int service);
 int rcv_request(int fdRead);
 void send_reply(int fdWrite, bool r);
 bool rcv_reply(int fdRead);
+void send_adc(int fdWrite);//adc = accusé de réception
+void rcv_adc(int fdRead); // coté orchestre
 
-/*
-void send_Ask(int fdWrite, int service);
-AskServices getAskFromClient(int fdRead);
-void destroy_Ask(AskServices *pself);
-bool getOk(AskServices self);
-int getService(AskServices self);
-*/
 
 int creat_mutex();
 int recup_mutex();

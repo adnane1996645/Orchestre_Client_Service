@@ -42,25 +42,54 @@ int main(int argc, char * argv[])
     //         ou . client_somme_verifArgs
     //         ou . client_compression_verifArgs
     //         ou . client_maximum_verifArgs
+    else if(numService == -1)
+      client_arret_verifArgs(argc, argv[]);
+    else if(numService == 0)
+      client_somme_verifArgs(argc, argv[]);
+    else if(numService == 1)
+      client_compression_verifArgs(argc, argv[]);
+    else if(numService == 2)
+      client_maximum_verifArgs(argc, argv[]);
 
     // initialisations diverses s'il y a lieu
+    int semid = recup_mutex();
+    int *fd;
+    bool rp;
+    Com com;
 
     // entrée en section critique pour communiquer avec l'orchestre
+    p_mutex(semid);
     
     // ouverture des tubes avec l'orchestre
+    fd = open_pipes_c(); //fd[0]->lecture  /  fd[1]->ecriture
 
     // envoi à l'orchestre du numéro du service
+    send_request(fd[1], numService);
 
     // attente code de retour
+    rp = rcv_reply(fd[0]);
+    
     // si code d'erreur
     //     afficher un message erreur
+    if(rp == false)
+      printf("erreur: l'orchestre n'a pas accepter votre demande \n");
+    
     // sinon si demande d'arrêt (i.e. numService == -1)
     //     afficher un message
+    else if(numService == -1)
+      printf("l'orchestre va s'arrêter \n");
+      
     // sinon
     //     récupération du mot de passe et des noms des 2 tubes
+    else
+      com = rcv_com(fd[0]);
+    
     // finsi
     //
+    
     // envoi d'un accusé de réception à l'orchestre
+    send_adc(fd[1]);
+    
     // fermeture des tubes avec l'orchestre
     // sortie de la section critique
     //
