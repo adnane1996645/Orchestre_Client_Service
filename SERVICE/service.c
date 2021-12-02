@@ -127,7 +127,7 @@ int main(int argc, char * argv[])
           }
       }
     // libération éventuelle de ressources
-    destroy_Order(&order)
+    destroy_Order(&order);
 
   return EXIT_SUCCESS;
 }
