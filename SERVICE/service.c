@@ -21,6 +21,7 @@ Bionôme :  - Adnane LAANANI
 
 
 
+
 static void usage(const char *exeName, const char *message)
 {
     fprintf(stderr, "usage : %s <num_service> <clé_sémaphore> <fd_tube_anonyme> "
@@ -126,7 +127,7 @@ int main(int argc, char * argv[])
           }
       }
     // libération éventuelle de ressources
-    destroy_Order(&order)
+    destroy_Order(&order);
 
   return EXIT_SUCCESS;
 }

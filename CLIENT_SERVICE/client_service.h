@@ -8,6 +8,7 @@
 #define WRONG_PWD "INCORRECT PASSWORD"
 #define ACR "RESULT OK"
 
+typedef struct Service_ComP * Service_Com;
 bool getPWDFromClient(int fdClientToService);
 void sendReponsePWD(int fdSeviceToClient, bool isOK);
 
