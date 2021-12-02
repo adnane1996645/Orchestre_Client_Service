@@ -36,13 +36,13 @@ struct Config
     int NB_Services;
     char * exeName;
     bool * open;
-    int * Num_services;
+    //int * Num_services;
     bool configInit_is_notCalled;
     bool configExit_is_notCalled;
 
 };
 
-struct Config config = {0,NULL,NULL,NULL,true,true};
+struct Config config = {0,NULL,NULL,true,true};
 
 void config_init(const char *filename)
 {
@@ -61,11 +61,12 @@ void config_init(const char *filename)
     MY_MALLOC(config.exeName, char , LONGUEUR_exeName);
     fscanf(fd,"%s\n",config.exeName);
     MY_MALLOC(config.open, bool, nb_services); //allocation pour un tableau d'etat d'un service
-    MY_MALLOC(config.Num_services, int , nb_services);
+    //MY_MALLOC(config.Num_services, int , nb_services);
     for(int i =0; i< nb_services; i++)
     {
           char service[10];
-          fscanf(fd,"%d ",config.Num_services+i);
+          int s;
+          fscanf(fd,"%d ",&s);
           fscanf(fd,"%s\n",service);
           config.open[i] = (strcmp(service,"ouvert") == 0);
     }
@@ -80,7 +81,7 @@ void config_exit()
     // TODO code vide par défaut, à remplacer
     //      libération des ressources
     free(config.open);
-    free(config.Num_services);
+    //free(config.Num_services);
     free(config.exeName);
 }
 
@@ -112,7 +113,7 @@ bool config_isServiceOpen(int pos)
     // TODO erreur si la fonction est appelée après config_exit
     myassert(config.configExit_is_notCalled,"La fonction config_isServiceOpen est appelée après config_exit!");
     // TODO erreur si "pos" est incorrect
-    myassert(pos>=0 && pos<nb,"position du service invalide!");
+    myassert(pos>=0 && pos<nb,"Numéro du service est invalide!");
     // TODO code par défaut, à remplacer
     return config.open[pos];
 }
