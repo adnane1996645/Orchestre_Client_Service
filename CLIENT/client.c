@@ -97,10 +97,11 @@ int main(int argc, char * argv[])
     v_mutex(semid);
     
     //
-    // si pas d'erreur et service normal
-    ///////****je vois pas à quoi çà correspond****////////
-    if(/*condition?? */){  
+    // si pas d'erreur(de code d'erreur) et service normal(donc de 0 à 2)
     
+    if((rp == true) && numService != -1){  //l'orchestre a accepté la demande (demande qui n'ai pas une demande d'arret)
+
+      
     //     ouverture des tubes avec le service
       int fdW = openTubeWrite(getPipe(com, 1), "erreur d'ouverture en écriture du tube entre le client et les service");
       int fdR = openTubeRead(getPipe(com, 2), "erreur d'ouverture en lecture du tube entre le client et les service");

@@ -15,8 +15,8 @@
 
 
 struct ComP{//pour la communication client_service
-  int mdp; //motdepass envoyé par l'orchestre au client pour qu'il puisse valider ses communications avec le service
-  char *tube1, *tube2; //nom des tubes par les quels vont transiter les comms entre le client et le service
+  int pwd; //motdepass envoyé par l'orchestre au client pour qu'il puisse valider ses communications avec le service
+  char *pipe1, *pipe2; //nom des tubes par les quels vont transiter les comms entre le client et le service
 };
 
 void creat_named_pipes(){
@@ -65,22 +65,22 @@ Com init_com(int num_service, int mdp){//initialisation communication services-c
   
   MY_MALLOC(c, struct ComP, 1);
   MY_MALLOC(a, char, 1);
-  c->mdp = mdp;
+  c->pwd = mdp;
   
   int len = strlen("../pipe_s2c_1");
   MY_MALLOC(c->tube1, char, len+1);//len + 1 pour le \0
   MY_MALLOC(c->tube2, char, len+1);
-  c->tube1 = "../pipe_c2s_";//on laisse une place de libre a la fin de la chaine pour le numéro du service
-  c->tube2 = "../pipe_s2c_";
+  c->pipe1 = "../pipe_c2s_";//on laisse une place de libre a la fin de la chaine pour le numéro du service
+  c->pipe2 = "../pipe_s2c_";
 
   sprintf(a, "%d", num_service);//convertion int en chaine
   
-  strcat(c->tube1, a);//on concatène pour former le nom du tube en entier
-  strcat(c->tube2, a);
+  strcat(c->pipe1, a);//on concatène pour former le nom du tube en entier
+  strcat(c->pipe2, a);
   
-  ret = mkfifo(c->tube1, 0641);
+  ret = mkfifo(c->pipe1, 0641);
   assert(ret != -1);
-  ret = mkfifo(c->tube2, 0641);
+  ret = mkfifo(c->pipe2, 0641);
   assert(ret != -1);
 
   return c;
@@ -104,19 +104,19 @@ void destroy_com(Com *pself){
   Com self = *pself;
   
   MY_FREE(self);
-  MY_FREE(self->tube1);
-  MY_FREE(self->tube2);
+  MY_FREE(self->pipe1);
+  MY_FREE(self->pipe2);
 }
 
 int getPwd(constCom c){
-  return c->mdp;
+  return c->pwd;
 }
 
 char * getPipe(constCom c, int n){
   if(n == 1)
-    return c->tube1;
+    return c->pipe1;
   else if(n == 2)
-    return c->tube2;
+    return c->pipe2;
   else return NULL;//exit();
 }
 
