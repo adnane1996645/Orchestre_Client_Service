@@ -14,7 +14,6 @@ struct DataP{
     float somme;
 };
 
-
 typedef struct DataP * Data;
 
 /*----------------------------------------------*

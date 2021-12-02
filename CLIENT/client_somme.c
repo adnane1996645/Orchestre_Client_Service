@@ -4,6 +4,7 @@
 
 #include "client_service.h"
 #include "client_somme.h"
+#include <limits.h>
 
 
 /*----------------------------------------------*
@@ -29,11 +30,25 @@ static void usage(const char *exeName, const char *numService, const char *messa
  * fonction de vérification des paramètres
  *----------------------------------------------*/
 
+struct DataP
+{
+    int a;
+    int b;
+    int somme;
+};
+
+typedef struct DataP * Data;
+
 void client_somme_verifArgs(int argc, char * argv[])
 {
+    long int tmp1 = strtol(argv[2]);
+    long int tmp2 = strtol(argv[3]);
+
     if (argc != 5)
         usage(argv[0], argv[1], "nombre d'arguments");
     // éventuellement d'autres tests
+
+    myassert(tmp1 >= INT_MIN && tmp1 <= INT_MAX && tmp2 >= INT_MIN && tmp2 <= INT_MAX , "Erreur overflow int");
 }
 
 
@@ -46,9 +61,11 @@ void client_somme_verifArgs(int argc, char * argv[])
 // Les paramètres sont
 // - le file descriptor du tube de communication vers le service
 // - les deux float dont on veut la somme
-static void sendData(/* fd_pipe_to_service,*/ /* entier1, */ /* entier2 */)
+static void sendData(int fdWrite,  int entier1, int entier2)
 {
     // envoi des deux nombres
+    write(fdWrite, &entier1, sizeof(int));
+    write(fdWrite, &entier2, sizeof(int));
 }
 
 // ---------------------------------------------
@@ -57,10 +74,13 @@ static void sendData(/* fd_pipe_to_service,*/ /* entier1, */ /* entier2 */)
 // - le file descriptor du tube de communication en provenance du service
 // - le prefixe
 // - autre chose si nécessaire
-static void receiveResult(/* fd_pipe_from_service,*/ /* préfixe, */ /* autres paramètres si nécessaire */)
+static void receiveResult(int fdRead, char * prefixe, Data data)
 {
     // récupération de la somme
     // affichage du préfixe et du résultat
+    read(fdRead, &(data->somme), sizeof(int));
+    printf("%s %d", prefixe, data->somme);
+    printf("\n");
 }
 
 
@@ -73,10 +93,17 @@ static void receiveResult(/* fd_pipe_from_service,*/ /* préfixe, */ /* autres p
 //    - argv[2] : premier nombre
 //    - argv[3] : deuxième nombre
 //    - argv[4] : chaîne à afficher avant le résultat
-void client_somme(/* fd des tubes avec le service, */ int argc, char * argv[])
+void client_somme(int fdWrite, int fdRead, int argc, char * argv[])
 {
     // variables locales éventuelles
-    sendData(/* paramètres */);
-    receiveResult(/* paramètres */);
-}
+    Data data;
 
+    if (argc != 5)
+        usage(argv[0], argv[1], "nombre d'arguments");
+    MY_MALLOC(data, struct DataP, 1);
+    data->a = io_strToInt(argv[2]);
+    data->b = io_strToInt(argv[3]);
+    sendData(fdWrite, data->a, data->b);
+    receiveResult(fdRead, argv[4], data);
+    MY_FREE(data);
+}

@@ -15,11 +15,11 @@
 
 //#include "service_maximum.h"
 
-#define NB_THREADS 3
 
 // définition éventuelle de types pour stocker les données
 
 struct DataP{
+    int NB_THREADS;
     float* TAB;
     int length;
     float max;
@@ -68,6 +68,7 @@ void * routine(void * arg)
 
 ThreadData* createThreadDatas(Data d)
 {
+    int NB_THREADS = d->NB_THREADS;
     pthread_mutex_t mux = PTHREAD_MUTEX_INITIALIZER;
     ThreadData* datas = (ThreadData*)malloc(sizeof(ThreadData) * NB_THREADS);
     int intervalLength = d->length/NB_THREADS;
@@ -89,7 +90,8 @@ ThreadData* createThreadDatas(Data d)
 // fonction de traitement des données
 static void computeResult(Data d)
 {
-    pthread_t tabId[NB_THREADS];
+    int NB_THREADS = d->NB_THREADS;
+    pthread_t * tabId = (pthread_t*)malloc(sizeof(pthread_t) * NB_THREADS);
     ThreadData* datas = createThreadDatas(d);
     // lancement des threads
     for (int i = 0; i < NB_THREADS; i++)
@@ -109,7 +111,8 @@ static void computeResult(Data d)
 // fonction de réception des données
 static void receiveData(int fdRead, Data data)
 {
-    data->max = data->TAB[0];
+    read(fdRead, &(data->NB_THREADS), sizeof(int));
+    data->max = -FLT_MAX;
     read(fdRead, &(data->length), sizeof(float));
     data->TAB = malloc(sizeof(float)*data->length);
     for(int i = 0; i < data->length; i++)
