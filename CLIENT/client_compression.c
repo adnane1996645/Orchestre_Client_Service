@@ -28,11 +28,23 @@ static void usage(const char *exeName, const char *numService, const char *messa
  * fonction de vérification des paramètres
  *----------------------------------------------*/
 
+ struct DataP
+ {
+     char * str;
+     int lstr;
+     char * dest;
+     int ldest;
+ };
+
+ typedef struct DataP * Data;
+
 void client_compression_verifArgs(int argc, char * argv[])
 {
     if (argc != 3)
         usage(argv[0], argv[1], "nombre d'arguments");
     // éventuellement d'autres tests
+    int service = io_strToInt(argv[1]);
+    myassert(service == 1, "Le numéro de service n'est pas le service de compression");
 }
 
 
@@ -45,9 +57,10 @@ void client_compression_verifArgs(int argc, char * argv[])
 // Les paramètres sont
 // - le file descriptor du tube de communication vers le service
 // - la chaîne devant être compressée
-static void sendData(/* fd_pipe_to_service,*/ /* chaine_à_envoyer */)
+static void sendData(int fdWrite,  Data data)
 {
-    // envoi de la chaîne à compresser
+      write(fdWrite, &(data->lstr), sizeof(int));
+      write(fdWrite, data->str, sizeof(char) * data->lstr);
 }
 
 // ---------------------------------------------
@@ -55,10 +68,11 @@ static void sendData(/* fd_pipe_to_service,*/ /* chaine_à_envoyer */)
 // Les paramètres sont
 // - le file descriptor du tube de communication en provenance du service
 // - autre chose si nécessaire
-static void receiveResult(/* fd_pipe_from_service,*/ /* autres paramètres si nécessaire */)
+static void receiveResult(int fdRead,  Data data)
 {
-    // récupération de la chaîne compressée
-    // affichage du résultat
+    read(fdRead, &(data->ldest), sizeof(int));
+    data->dest = (char *)malloc(sizeof(char) * data->ldest);
+    read(fdRead, data->dest, sizeof(char) * data->ldest);
 }
 
 // ---------------------------------------------
@@ -68,10 +82,19 @@ static void receiveResult(/* fd_pipe_from_service,*/ /* autres paramètres si n�
 // - argc et argv fournis en ligne de commande
 // Cette fonction analyse argv et en déduit les données à envoyer
 //    - argv[2] : la chaîne à compresser
-void client_compression(/* fd des tubes avec le service, */ int argc, char * argv[])
+void client_compression(int fdWrite, int fdRead, int argc, char * argv[])
 {
     // variables locales éventuelles
-    sendData(/* paramètres */);
-    receiveResult(/* paramètres */);
-}
+    Data data = malloc(sizeof(struct DataP));
+    int l;
 
+    data->lstr = strlen(argv[2])-1;
+    l = data->lstr;
+    data->str = malloc(sizeof(char) * data->lstr);
+    for(int i = 0; i<l-1; i++)
+        data->str[i-1] = argv[2][i+1];
+    data->str[l-1] = '\0';
+    
+    sendData(fdWrite, data);
+    receiveResult(fdRead, data);
+}

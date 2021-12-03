@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
+#include "myassert.h"
 #include "client_service.h"
 #include "client_maximum.h"
+#include <assert.h>
 
 
 /*----------------------------------------------*
@@ -28,12 +29,21 @@ static void usage(const char *exeName, const char *numService, const char *messa
 /*----------------------------------------------*
  * fonction de vérification des paramètres
  *----------------------------------------------*/
+ struct DataP{
+     int NB_THREADS;
+     float* TAB;
+     int length;
+     float max;
+ };
+
 
 void client_maximum_verifArgs(int argc, char * argv[])
 {
     if (argc < 4)
-        usage(argv[0], argv[1], "nombre d'arguments");
-    
+        usage(argv[0], argv[1], "nombre d'arguments")
+
+    int thread = io_strToInt(argv[2]);
+    myassert(tmp1 == INT_MIN && tmp1 <= INT_MAX , "Erreur overflow int");
 }
 
 
@@ -47,13 +57,15 @@ void client_maximum_verifArgs(int argc, char * argv[])
 // - le file descriptor du tube de communication vers le service
 // - le nombre de threads que doit utiliser le service
 // - le tableau de float dont on veut le maximum
-static void sendData(int fd_pipe_to_service , int nbre_threads, float * tab_float)
+static void sendData(int fdWrite , Data data)
 {
+  int l = data->length;
   // envoi du nombre de threads et du tableau de float
-  int ret = write(fd_pipe_to_service, &nbre_threads, sizeof(int));
-  assert(ret != -1);
-  ret = write(fd_pipe_to_service, &tab_float, sizeof(float *));
-  assert(ret != -1);
+  write(fdWrite, &(data->NB_THREADS), sizeof(int));
+  //assert(ret != -1);
+  write(fdWrite, &(data->length), sizeof(int);
+  for(int i = 0; i < data->length; i++)
+        write(fdWrite, data->TAB+i, sizeof(float));
 }
 
 // ---------------------------------------------
@@ -61,14 +73,12 @@ static void sendData(int fd_pipe_to_service , int nbre_threads, float * tab_floa
 // Les paramètres sont
 // - le file descriptor du tube de communication en provenance du service
 // - autre chose si nécessaire
-static void receiveResult(int fd /* ,autres paramètres si nécessaire */)
+static void receiveResult(int fd, Data data)
 {
     // récupération du maximum
-  float res;
-  int ret = read(fd,&res,sizeof(float));
-  assert(ret != -1);
+    read(fd, &(data->max), sizeof(float));
     // affichage du résultat
-  printf("resultat: %f\n",res);
+    printf("resultat: %f\n", data->max);
 }
 
 
@@ -80,15 +90,20 @@ static void receiveResult(int fd /* ,autres paramètres si nécessaire */)
 // Cette fonction analyse argv et en déduit les données à envoyer
 //    - argv[2] : nombre de threads
 //    - argv[3] à argv[argc-1]: les nombres flottants
-void client_maximum(int fd1, int fd2, int argc, char * argv[])
+void client_maximum(int fdWrite, int fdRead, int argc, char * argv[])
 {
   // variables locales éventuelles
-  float tab[argc-4];
-  for(int i = 3; i <= argc-1; i++)
-    tab[i-3] = argv[i];
-
+  Data data = malloc(sizeof(struct DataP));
+  int nb_thread = io_strToInt(argv[2]);
   
-  sendData(fd1, argv[2], tab);
-  receiveResult(fd2);
-}
+  data->length = argc-3;
 
+  data->TAB = malloc(sizeof(float) * data->length);
+  for(int i = 3; i < argc; i++)
+     data->TAB[i-3] = io_strToFloat(argv[i]);
+
+  sendData(fdWrite, data);
+  free(data->TAB);
+  free(data);
+  receiveResult(fdRead, data);
+}

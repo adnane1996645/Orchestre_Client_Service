@@ -47,7 +47,8 @@ void client_somme_verifArgs(int argc, char * argv[])
     if (argc != 5)
         usage(argv[0], argv[1], "nombre d'arguments");
     // éventuellement d'autres tests
-
+    int service = io_strToInt(argv[1]);
+    myassert(service == 0, "Le numéro de service n'est pas le service de somme");
     myassert(tmp1 >= INT_MIN && tmp1 <= INT_MAX && tmp2 >= INT_MIN && tmp2 <= INT_MAX , "Erreur overflow int");
 }
 
