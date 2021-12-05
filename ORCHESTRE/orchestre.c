@@ -38,14 +38,16 @@ static void usage(const char *exeName, const char *message)
 }
 
 
-static void startServices(int r_pipe_OtoS, int w_pipe_OtoS){
+static int startServices(int **pipe_OtoS,int semid[]){
   
-  // Initialise le tube anonyme
-  int ret = pipe(r_pipe_OtoS);
-  assert(ret != -1);
+  
 
   //boucle de création des i services
   for(int i = 0; i < 3; i++){
+    
+    // Initialise le tube anonyme
+    int ret = pipe(pipe_OtoS[i]);
+    assert(ret != -1);
     
     int resFork = fork();
     assert(resFork != -1);
@@ -55,28 +57,35 @@ static void startServices(int r_pipe_OtoS, int w_pipe_OtoS){
     {
       char fd[20];
       
-      ret = close(r_pipe_OtoS);//on ferme le tube anonyme en écriture du coté du service
+      ret = close(pipe_OtoS[i][1]);//on ferme le tube anonyme en écriture du coté du service
       assert(ret != -1);
 
-      ret = sprintf(fd,"%d",r_pipe_OtoS);
+      ret = sprintf(fd,"%d",pipe_OtoS[i][0]);
       assert(ret >= 0);
       
-      if(i == 0)// en position 2 ("1") c'est le projid pour la clé de semaphore
+      if(i == 0){// en position 2 ("1") c'est le projid pour la clé de semaphore
 	char *const parmList[] = {"Service", "0", "1", fd, "../pipe_s2c_0", "../pipe_c2s_0", NULL};
+	semid[i] = mysemget(1);
+      }
       
-      else if(i == 1)
+      else if(i == 1){
 	char *const parmList[] = {"Service", "1", "2", fd, "../pipe_s2c_1", "../pipe_c2s_1", NULL};
+	semid[i] = mysemget(2);
+      }
       
-      else if(i == 2)
+      else if(i == 2){
 	char *const parmList[] = {"Service", "2", "3", fd, "../pipe_s2c_2", "../pipe_c2s_2", NULL};
+	semid[i] = mysemget(3);
+      }
       
       execv("Service", parmList);
-      //on est pas sensé se retrouver ici
+      
+      printf("Probleme dans le exec\n");//on est pas sensé se retrouver ici
     }
     else{
-      ret = close(w_pipe_OtoS);//on ferme le tube anonyme en lecture du coté du orchestre
+      ret = close(pipe_OtoS[i][0]);//on ferme le tube anonyme en lecture du coté du orchestre
       assert(ret != -1);
-    } 
+    }
   }
 }
 
@@ -90,7 +99,10 @@ int main(int argc, char * argv[])
   int *fd;
   int service, pwd;
   bool serv_fini[3];
-  int unnamed_pipe_OtoS[2];
+  int semidS[3];
+  int unnamed_pipe_OtoS[3][2];
+  Order ord;
+  Com c;
   
   // lecture du fichier de configuration
   config_init(argv[1]);
@@ -105,7 +117,7 @@ int main(int argc, char * argv[])
   // - création d'un tube anonyme pour converser (orchestre vers service)
   // - un sémaphore pour que le service préviene l'orchestre de la fin d'un traitement
   // - création de deux tubes nommés (pour chaque service) pour les communications entre les clients et les services
-  startServices(unnamed_pipe_OtoS[0], unnamed_pipe_OtoS[1]);
+  startServices(unnamed_pipe_OtoS, semidS);
   
   while (! fin)
     {
@@ -118,9 +130,8 @@ int main(int argc, char * argv[])
       // détecter la fin des traitements lancés précédemment via
       // les sémaphores dédiés (attention on n'attend pas la
       // fin des traitement, on note juste ceux qui sont finis)
-      
-      /*besoin de faire une fonction dans orchestre_service, i.e: bool * getserv_fin(int * servId); */
-      if(semctl(semid[service], 0, GETVAL, 0) == 0)
+      /*une fonction dans orchestre_service pourrait etre utile, i.e: bool * getserv_fin(int * servId); */
+      if(semctl(semidS[service], 0, GETVAL, 0) == 0)
 	serv_fini[service] = true;
       else serv_fini[service] = false;
 
@@ -141,7 +152,7 @@ int main(int argc, char * argv[])
       
       // sinon si service est déjà en cours de traitement
       //     envoi au client d'un code d'erreur (via le tube nommé)
-      else if(serv_fini == false)
+      else if(serv_fini[service] == false)
 	send_reply(fd[1], false);
       
       // sinon
@@ -153,35 +164,56 @@ int main(int argc, char * argv[])
 	pwd = genPwd();
 	
       //     envoi d'un code de travail au service (via le tube anonyme)
-	
-	
       //     envoi du mot de passe au service (via le tube anonyme)
+	ord = init_Order(true, pwd);
+	OrderOrchestreToService(unnamed_pipe_OtoS[service][1], ord);
+	
       //     envoi du mot de passe au client (via le tube nommé)
       //     envoi des noms des tubes nommés au client (via le tube nommé)
+	c = init_com(service , pwd);
+	send_com(fd[1], c);
+	
       // finsi
+      }
       
       // attente d'un accusé de réception du client
-	rcv_adc(fd[0]);
+      rcv_adc(fd[0]);
 
       // fermer les tubes vers le client
-
+      close_pipes(fd);
       
       // il peut y avoir un problème si l'orchestre revient en haut de la
       // boucle avant que le client ait eu le temps de fermer les tubes
       // il faudrait régler cela avec un sémaphore, mais on va se contenter
       // d'une attente de 1 seconde (solution non satisfaisante mais simple)
-	sleep(1);
-      }
+      sleep(1);
+      if(c != NULL)//peut importe que ce code soit avant ou après le sleep
+	destroy_com(&c);//on libere l'espace alloué par les mallocs fais dans les init ici
+      if(ord != NULL)//car on peux pas le faire en dehors de la boucle sans perdre les adresses des précédentes allocations
+	destroy_Order(&ord);
     }
+  
+  
   // attente de la fin des traitements en cours (via les sémaphores)
   
+  //on pourrais ptt attendre pour 1 service puis lui envoyé le code de fin puis attendre sa terminaison,puis service suivant(ect)
+  
+  for(int i = 0; i < 3; i++)
+    mysem_attente(semidS[i]);
+  
+  
   // envoi à chaque service d'un code de fin
+  ord = init_Order(false, pwd);
+  
+  for(int i = 0; i < 3; i++)
+    OrderOrchestreToService(unnamed_pipe_OtoS[i][1], ord);
   
   // attente de la terminaison des processus services
-  wait(NULL);
-  wait(NULL);
-  wait(NULL);
+  for(int i = 0; i < 3; i++)
+    wait(NULL);
+  
   // libération des ressources
+  destroy_Order(&ord);
   
   return EXIT_SUCCESS;
 }

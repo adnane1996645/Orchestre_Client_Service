@@ -120,6 +120,15 @@ char * getPipe(constCom c, int n){
   else return NULL;//exit();
 }
 
+/*
+void setPwd(Com c, int pwd){
+  c->pwd = pwd;
+}
+
+void setP1(Com c, int num){
+ 
+}
+*/
 
 ////////requete et réponse pour la demande d'un service/////////
 
