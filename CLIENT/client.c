@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
 
-#include "io.h"
-#include "memory.h"
-#include "myassert.h"
+#include "../UTILS/memory.h"
+#include "../UTILS/myassert.h"
 
-#include "service.h"
-#include "client_orchestre.h"
-#include "client_service.h"
+#include "../SERVICE/service.h"
+#include "../CLIENT_ORCHESTRE/client_orchestre.h"
+#include "../CLIENT_SERVICE/client_service.h"
 
 #include "client_arret.h"
 #include "client_somme.h"

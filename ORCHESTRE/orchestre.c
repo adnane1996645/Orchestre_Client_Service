@@ -14,12 +14,13 @@
 #include <sys/stat.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
+#include <sys/wait.h>
 #include <time.h>
 
-#include "config.h"
-#include "client_orchestre.h"
-#include "orchestre_service.h"
-#include "service.h"
+#include "../CONFIG/config.h"
+#include "../CLIENT_ORCHESTRE/client_orchestre.h"
+#include "../ORCHESTRE_SERVICE/orchestre_service.h"
+#include "../SERVICE/service.h"
 
 
 static int genPwd(){
@@ -38,10 +39,9 @@ static void usage(const char *exeName, const char *message)
 }
 
 
-static void startServices(int **pipe_OtoS,int semid[]){
+// il n'y à pas d'allocation dynamique car peux importe le nb de service, on passera tjr en param un tableau a 2 colonnes
+static void startServices(int (*pipe_OtoS)[2],int semid[]){//2 colonnes(donc une ligne) pour chaque pipe
   
-  
-
   //boucle de création des i services
   for(int i = 0; i < 3; i++){
     
@@ -66,19 +66,22 @@ static void startServices(int **pipe_OtoS,int semid[]){
       if(i == 0){// en position 2 ("1") c'est le projid pour la clé de semaphore
 	char *const parmList[] = {"Service", "0", "1", fd, "../pipe_s2c_0", "../pipe_c2s_0", NULL};
 	semid[i] = mysemget(1);
+	execv("Service", parmList);
       }
       
       else if(i == 1){
 	char *const parmList[] = {"Service", "1", "2", fd, "../pipe_s2c_1", "../pipe_c2s_1", NULL};
 	semid[i] = mysemget(2);
+	execv("Service", parmList);
       }
       
       else if(i == 2){
 	char *const parmList[] = {"Service", "2", "3", fd, "../pipe_s2c_2", "../pipe_c2s_2", NULL};
 	semid[i] = mysemget(3);
+	execv("Service", parmList);
       }
       
-      execv("Service", parmList);
+      
       
       printf("Probleme dans le exec\n");//on est pas sensé se retrouver ici
     }
@@ -100,7 +103,7 @@ int main(int argc, char * argv[])
   int service, pwd;
   bool serv_fini[3];
   int semidS[3];
-  int unnamed_pipe_OtoS[3][2];
+  int unnamed_pipe_OtoS[3][2];//pas d'allocation dynamique (voir fonction startServices)
   Order ord;
   Com c;
   
@@ -111,7 +114,7 @@ int main(int argc, char * argv[])
   // - création de 2 tubes nommés pour converser avec les clients
   // - création d'un sémaphore pour que deux clients ne communiquent pas en même temps avec l'orchestre
   creat_named_pipe();
-  int semid = creat_mutex();
+  creat_mutex();
   
   // lancement des services, avec pour chaque service :
   // - création d'un tube anonyme pour converser (orchestre vers service)
