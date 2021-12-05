@@ -28,8 +28,6 @@ Com rcv_com(int fdRead);
 void destroy_com(Com *pself);
 int getPwd(constCom c);
 char * getPipe(constCom c, int n);
-void setPwd(Com c, int pwd);
-void setNumS(Com c, int num);
 
 
 void send_request(int fdWrite, int service);

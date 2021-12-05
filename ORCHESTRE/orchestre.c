@@ -38,7 +38,7 @@ static void usage(const char *exeName, const char *message)
 }
 
 
-static int startServices(int **pipe_OtoS,int semid[]){
+static void startServices(int **pipe_OtoS,int semid[]){
   
   
 
