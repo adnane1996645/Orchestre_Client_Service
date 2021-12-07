@@ -7,7 +7,7 @@
 //   d'un traitement
 #include <stdbool.h>
 
-#define ORCHESTRE_SERVICE "orchestre_service.h"
+#define ORCHESTRE_SERVICE "../ORCHESTRE_SERVICE/orchestre_service.h"
 
 typedef struct OrderP * Order;
 
@@ -18,6 +18,7 @@ void destroy_Order(Order * pself);
 void OrderOrchestreToService(int fdWrite,  Order order);
 Order getOrderFromOrchestre(int fdRead);
 
+int mysemget_create(int pojid);
 int mysemget(int pojid);
 void mysem_descre(int semId); // desincremente la valeur du semaphore par 1
 void mysem_incre(int semId); // incremente la valeur du semaphore par 1

@@ -19,7 +19,7 @@ struct ComP{//pour la communication client_service
   char *pipe1, *pipe2; //nom des tubes par les quels vont transiter les comms entre le client et le service
 };
 
-void creat_named_pipes(){
+void creat_named_pipe(){
   int ret = mkfifo("../pipe_o2c",0641); //chemin relatif
   assert(ret != -1);
   ret = mkfifo("../pipe_c2o",0641);
@@ -62,11 +62,11 @@ Com init_com(int num_service, int mdp){//initialisation communication services-c
   Com c;
   char *a;
   int ret;
-  
+
   MY_MALLOC(c, struct ComP, 1);
   MY_MALLOC(a, char, 1);
   c->pwd = mdp;
-  
+
   int len = strlen("../pipe_s2c_1");
   MY_MALLOC(c->pipe1, char, len+1);//len + 1 pour le \0
   MY_MALLOC(c->pipe2, char, len+1);
@@ -74,10 +74,10 @@ Com init_com(int num_service, int mdp){//initialisation communication services-c
   c->pipe2 = "../pipe_s2c_";
 
   sprintf(a, "%d", num_service);//convertion int en chaine
-  
+
   strcat(c->pipe1, a);//on concatène pour former le nom du tube en entier
   strcat(c->pipe2, a);
-  
+
   ret = mkfifo(c->pipe1, 0641);
   assert(ret != -1);
   ret = mkfifo(c->pipe2, 0641);
@@ -102,7 +102,7 @@ Com rcv_com(int fdRead){//recevoir le nom des tube et mdp pour la com service cl
 
 void destroy_com(Com *pself){
   Com self = *pself;
-  
+
   MY_FREE(self);
   MY_FREE(self->pipe1);
   MY_FREE(self->pipe2);
@@ -171,10 +171,10 @@ void rcv_adc(int fdRead){ // coté orchestre
 void creat_mutex(){//on ne retourne pas le semid car l'orchestre ne l'utilise pas
   key_t key = ftok(CLIENT_ORCHESTRE, PROJ_ID);
   assert(key != -1);
-  
+
   int semid = semget(key, 1, IPC_CREAT | IPC_EXCL | 0641);
   assert(semid != -1);
-  
+
   int ret = semctl(semid, 0, SETVAL, 1);//1 pour imiter un mutex
   assert(ret != -1);
 
@@ -183,10 +183,10 @@ void creat_mutex(){//on ne retourne pas le semid car l'orchestre ne l'utilise pa
 int recup_mutex(){//c'est une erreur d'appeler cette fonction si le mutex n'a pas été créé préalablement
   key_t key = ftok(CLIENT_ORCHESTRE, PROJ_ID);
   assert(key != -1);
-  
+
   int semid = semget(key, 1, 0); // 0 pour récupérer l'id d'un semaphore existant
   assert(semid != -1);
-  
+
   return semid;
 }
 
@@ -198,7 +198,7 @@ void v_mutex(int semid){
   int ret = semop(semid, &op, 1);
   assert(ret != -1);
 }
-  
+
 void p_mutex(int semid){
   struct sembuf op;
   op.sem_num = 0;
