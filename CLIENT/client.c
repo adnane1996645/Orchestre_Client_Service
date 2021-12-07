@@ -1,3 +1,10 @@
+/************************************************************************
+ * Projet CC2
+ * Programmation avancée en C
+ *
+ * Auteurs: Esteban Mauricio & Adnane 
+ ************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>

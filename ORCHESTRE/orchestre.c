@@ -41,6 +41,9 @@ static void usage(const char *exeName, const char *message)
 
 // il n'y à pas d'allocation dynamique car peux importe le nb de service, on passera tjr en param un tableau a 2 colonnes
 static void startServices(int (*pipe_OtoS)[2],int semid[]){//2 colonnes(donc une ligne) pour chaque pipe
+
+  int resFork = fork();
+  assert(resFork != -1);
   
   //boucle de création des i services
   for(int i = 0; i < 3; i++){
@@ -48,10 +51,11 @@ static void startServices(int (*pipe_OtoS)[2],int semid[]){//2 colonnes(donc une
     // Initialise le tube anonyme
     int ret = pipe(pipe_OtoS[i]);
     assert(ret != -1);
-    
-    int resFork = fork();
-    assert(resFork != -1);
 
+    if (resFork != 0 && i != 0){
+      resFork = fork();
+      assert(resFork != -1);
+    }
     
     if (resFork == 0) // on est dans un service général
     {
