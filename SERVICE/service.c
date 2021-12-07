@@ -6,8 +6,7 @@ Bionôme :  - Adnane LAANANI
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "orchestre_service.h"
-#include "client_service.h"
+#include "../ORCHESTRE_SERVICE/orchestre_service.h"
 #include "service.h"
 #include "service_somme.h"
 #include "service_compression.h"
@@ -18,6 +17,7 @@ Bionôme :  - Adnane LAANANI
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include "../CLIENT_SERVICE/client_service.h"
 
 
 
