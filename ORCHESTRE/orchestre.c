@@ -130,7 +130,6 @@ int main(int argc, char * argv[])
 
       // attente d'une demande de service du client
       service = rcv_request(fd[0]);
-      printf("coucou\n");
       // détecter la fin des traitements lancés précédemment via
       // les sémaphores dédiés (attention on n'attend pas la
       // fin des traitement, on note juste ceux qui sont finis)
