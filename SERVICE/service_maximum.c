@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include "service_maximum.h"
+#include "../UTILS/memory.h"
 
 //#include "service_maximum.h"
 

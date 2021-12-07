@@ -11,7 +11,7 @@ Bionôme :  - Adnane LAANANI
 #include "service.h"
 #include "service_somme.h"
 #include "service_compression.h"
-#include "myasset.h"
+#include "../UTILS/myassert.h"
 #include "service_maximum.h"
 #include <string.h>
 #include <unistd.h>
@@ -106,7 +106,7 @@ int main(int argc, char * argv[])
                               service_compression(fdClientToService, fdServiceToClient);//. service_compression
                               break;
                        case SERVICE_MAXIMUM :
-                              service_maximum(fdClientToService, fdServiceToClient)//. service_maximum
+                              service_maximum(fdClientToService, fdServiceToClient);//. service_maximum
                               break;
                        default :
                               printf("        Le numéro de service est incorrect et doit être entre 0 et %d\n", SERVICE_NB - 1);
@@ -125,9 +125,9 @@ int main(int argc, char * argv[])
               mysem_descre(semId);
               // finsi
           }
+          // libération éventuelle de ressources
+          destroy_Order(&order);
       }
-    // libération éventuelle de ressources
-    destroy_Order(&order);
 
   return EXIT_SUCCESS;
 }

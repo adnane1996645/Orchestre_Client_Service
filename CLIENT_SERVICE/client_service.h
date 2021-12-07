@@ -15,10 +15,10 @@ void destroy_service(Service_Com * pself);
 char * create_pipeS2C(Service_Com service);
 char * create_pipeC2S(Service_Com Service);
 int openTubeWrite(char * nomTube, char * Err);
-int openTubeRead(char * nomTube, char * Err)
+int openTubeRead(char * nomTube, char * Err);
 bool getPWDFromClient(int fdRead, int PwD);
 void sendReponsePWD(int fdWrite, bool isOK);
-void sendChaineToService(char * chaine, int fdWrite)
+void sendChaineToService(char * chaine, int fdWrite);
 char * getChainefromService(int fdRead);
 void sendACR(int fdWrite);
 void getACR(int fdRead);

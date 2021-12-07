@@ -6,7 +6,7 @@
 // - les deux tubes nommés pour la communication bidirectionnelle
 #include <stdbool.h>
 // fichier choisi pour l'identification du sémaphore
-#define CLIENT_ORCHESTRE "client_orchestre.h"
+#define CLIENT_ORCHESTRE "../CLIENT_ORCHESTRE/client_orchestre.h"
 
 // identifiant pour le deuxième paramètre de ftok
 #define PROJ_ID 5
@@ -22,7 +22,7 @@ int * open_pipes_c();//coté client
 int * open_pipes_o();//coté orchestre
 void close_pipes(int *fd);
 
-Com init_com(int num_service, int mdp);//crée la structure contenant le nom des tube et le mdp à envoyer au client 
+Com init_com(int num_service, int mdp);//crée la structure contenant le nom des tube et le mdp à envoyer au client
 void send_com(int fdWrite, constCom c);
 Com rcv_com(int fdRead);
 void destroy_com(Com *pself);

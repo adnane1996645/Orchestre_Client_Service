@@ -49,7 +49,7 @@ void OrderOrchestreToService(int fdWrite,  Order order) // ##true : ordre favora
 {
     write(fdWrite, &(order->isOk), sizeof(int));
     if(order->isOk)
-        write(fdWrite, order->motpasse, sizeof(int));
+        write(fdWrite, &order->motpasse, sizeof(int));
     close(fdWrite);
 }
 
@@ -81,7 +81,7 @@ int mysemget_create(int pojid)
 int mysemget(int pojid)
 {
     int semId;
-    key = ftok(ORCHESTRE_SERVICE, pojid);
+    key_t key = ftok(ORCHESTRE_SERVICE, pojid);
     semId = semget(key, 1, 0);
     myassert(semId!=-1, "Erreur dans la récupération du semaphore dans la fonction mysemget");
     return semId;

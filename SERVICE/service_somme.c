@@ -1,11 +1,14 @@
+#define _XOPEN_SOURCE 700
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
+#include <unistd.h>
 #include "orchestre_service.h"
 #include "client_service.h"
 
 #include "service_somme.h"
+
+
 
 // définition éventuelle de types pour stocker les données
 struct DataP{
@@ -50,7 +53,7 @@ void service_somme(int fdClientToService, int fdServiceToClient)
     printf("        Service Somme ... :\n");
     receiveData(fdClientToService, data);
     computeResult(data);
-    sendResult(fdServiceToClient);
+    sendResult(fdServiceToClient, data);
 
     // libération éventuelle de ressources
     free(data);
