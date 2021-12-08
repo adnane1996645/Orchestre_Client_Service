@@ -90,6 +90,11 @@ int openTubeRead(char * nomTube, char * Err)
     return fd;
 }
 
+void sendPWD(int fdWrite, int pwd)
+{
+    read(fdWrite, &pwd, sizeof(int));
+}
+
 bool getPWDFromClient(int fdRead, int PwD)
 {
       int pwd;
@@ -100,9 +105,27 @@ bool getPWDFromClient(int fdRead, int PwD)
 void sendReponsePWD(int fdWrite, bool isOK)
 {
      if(isOK)
-          write(fdWrite, &OK_PWD, sizeof(int));
+     {
+        int l = strlen(OK_PWD)+1;
+        write(fdWrite, &l, sizeof(int));
+        write(fdWrite, OK_PWD, sizeof(char) * l);
+     }
      else
-          write(fdWrite, &WRONG_PWD, sizeof(int));
+     {
+        int l = strlen(WRONG_PWD) +1;
+        write(fdWrite, &l, sizeof(int));
+        write(fdWrite, WRONG_PWD, sizeof(char) * l);
+     }
+}
+
+char * getReponsePWD(int fdWrite)
+{
+    int l;
+    char * rsp;
+    read(fdWrite, &l, sizeof(int));
+    rsp = malloc(sizeof(char) * l);
+    read(fdWrite, rsp, sizeof(char) * l);
+    return rsp;
 }
 
 void sendChaineToService(char * chaine, int fdWrite)

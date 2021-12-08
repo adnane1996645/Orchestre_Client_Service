@@ -12,6 +12,6 @@ void client_maximum_verifArgs(int argc, char * argv[]);
 
 
 // fonction pour gérer la communication avec le service
-void client_maximum(/* fd des deux tubes avec le service, */ int argc, char * argv[]);
+void client_maximum(int fdWrite, int fdRead, int argc, char * argv[]);
 
 #endif

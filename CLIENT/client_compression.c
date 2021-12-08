@@ -4,6 +4,12 @@
 
 #include "client_service.h"
 #include "client_compression.h"
+#include <string.h>
+#include <unistd.h>
+#include "../UTILS/memory.h"
+#include "../UTILS/io.h"
+#include "../UTILS/myassert.h"
+
 
 
 /*----------------------------------------------*
@@ -94,7 +100,8 @@ void client_compression(int fdWrite, int fdRead, int argc, char * argv[])
     for(int i = 0; i<l-1; i++)
         data->str[i-1] = argv[2][i+1];
     data->str[l-1] = '\0';
-    
+    if (argc != 3)
+        usage(argv[0], argv[1], "nombre d'arguments");
     sendData(fdWrite, data);
     receiveResult(fdRead, data);
 }

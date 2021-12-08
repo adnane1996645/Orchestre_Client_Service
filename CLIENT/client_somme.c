@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -5,7 +6,9 @@
 #include "client_service.h"
 #include "client_somme.h"
 #include <limits.h>
-
+#include "../UTILS/memory.h"
+#include "../UTILS/io.h"
+#include "../UTILS/myassert.h"
 
 /*----------------------------------------------*
  * usage pour le client somme
@@ -41,8 +44,8 @@ typedef struct DataP * Data;
 
 void client_somme_verifArgs(int argc, char * argv[])
 {
-    long int tmp1 = strtol(argv[2]);
-    long int tmp2 = strtol(argv[3]);
+    long int tmp1 = strtol(argv[2], NULL, 10);
+    long int tmp2 = strtol(argv[3], NULL, 10);
 
     if (argc != 5)
         usage(argv[0], argv[1], "nombre d'arguments");

@@ -1,10 +1,16 @@
+#define _XOPEN_SOURCE 700
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "myassert.h"
+#include "../UTILS/memory.h"
+#include "../UTILS/io.h"
+#include "../UTILS/myassert.h"
+
 #include "client_service.h"
 #include "client_maximum.h"
 #include <assert.h>
+#include <limits.h>
+#include <unistd.h>
 
 
 /*----------------------------------------------*
@@ -36,14 +42,15 @@ static void usage(const char *exeName, const char *numService, const char *messa
      float max;
  };
 
+typedef struct DataP * Data;
 
 void client_maximum_verifArgs(int argc, char * argv[])
 {
     if (argc < 4)
-        usage(argv[0], argv[1], "nombre d'arguments")
+        usage(argv[0], argv[1], "nombre d'arguments");
 
     int thread = io_strToInt(argv[2]);
-    myassert(tmp1 == INT_MIN && tmp1 <= INT_MAX , "Erreur overflow int");
+    myassert(thread >= INT_MIN && thread <= INT_MAX , "Erreur overflow int");
 }
 
 
@@ -59,11 +66,10 @@ void client_maximum_verifArgs(int argc, char * argv[])
 // - le tableau de float dont on veut le maximum
 static void sendData(int fdWrite , Data data)
 {
-  int l = data->length;
   // envoi du nombre de threads et du tableau de float
   write(fdWrite, &(data->NB_THREADS), sizeof(int));
   //assert(ret != -1);
-  write(fdWrite, &(data->length), sizeof(int);
+  write(fdWrite, &(data->length), sizeof(int));
   for(int i = 0; i < data->length; i++)
         write(fdWrite, data->TAB+i, sizeof(float));
 }
@@ -94,8 +100,8 @@ void client_maximum(int fdWrite, int fdRead, int argc, char * argv[])
 {
   // variables locales éventuelles
   Data data = malloc(sizeof(struct DataP));
-  int nb_thread = io_strToInt(argv[2]);
-  
+  data->NB_THREADS = io_strToInt(argv[2]);
+
   data->length = argc-3;
 
   data->TAB = malloc(sizeof(float) * data->length);
