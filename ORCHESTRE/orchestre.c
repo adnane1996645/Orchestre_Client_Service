@@ -2,14 +2,13 @@
  * Projet CC2
  * Programmation avancée en C
  *
- * Auteurs: Esteban Mauricio & Adnane 
+ * Auteurs: Esteban Mauricio & Adnane LAANANI
  ************************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ipc.h>
@@ -17,6 +16,7 @@
 #include <sys/wait.h>
 #include <time.h>
 
+#include "../UTILS/myassert.h"
 #include "../CONFIG/config.h"
 #include "../CLIENT_ORCHESTRE/client_orchestre.h"
 #include "../ORCHESTRE_SERVICE/orchestre_service.h"
@@ -43,55 +43,60 @@ static void usage(const char *exeName, const char *message)
 static void startServices(int (*pipe_OtoS)[2],int semid[]){//2 colonnes(donc une ligne) pour chaque pipe
 
   int resFork = fork();
-  assert(resFork != -1);
+  myassert(resFork != -1, "Erreur dans l'exécution du fork exterieur a la boucle for");
   
   //boucle de création des i services
   for(int i = 0; i < 3; i++){
     
     // Initialise le tube anonyme
     int ret = pipe(pipe_OtoS[i]);
-    assert(ret != -1);
+    myassert(ret != -1, "Erreur dans l'initialisation du tube anonyme OtoS ");
 
     if (resFork != 0 && i != 0){
       resFork = fork();
-      assert(resFork != -1);
+      myassert(resFork != -1, "Erreur du fork interieur a la boucle for");      
     }
     
     if (resFork == 0) // on est dans un service général
     {
       char fd[20];
+      char numService[20];
       
       ret = close(pipe_OtoS[i][1]);//on ferme le tube anonyme en écriture du coté du service
-      assert(ret != -1);
+      myassert(ret != -1, "Erreur dans la fermeture du tube anonyme en ecriture");
 
+      
       ret = sprintf(fd,"%d",pipe_OtoS[i][0]);
-      assert(ret >= 0);
+      myassert(ret >= 0, "Erreur lors de la convertion en chaine de caractere du file descriptor du tube");
+
+      ret = sprintf(numService,"%d",i);
+      myassert(ret >= 0, "Erreur lors de la convertion en chaine de caractere du numéro de service");
+
       
       if(i == 0){// en position 2 ("1") c'est le projid pour la clé de semaphore
-	char *const parmList[] = {"Service", "0", "1", fd, "../pipe_s2c_0", "../pipe_c2s_0", NULL};
-	semid[i] = mysemget(1);
-	execv("Service", parmList);
+	char *const parmList[] = {"SERVICE/service", numService, "1", fd, "../pipe_s2c_0", "../pipe_c2s_0", NULL};
+	semid[i] = mysemget_create(1);
+	ret = execv("SERVICE/service", parmList);
+	myassert(ret != -1, "Erreur du execv"); 
       }
       
       else if(i == 1){
-	char *const parmList[] = {"Service", "1", "2", fd, "../pipe_s2c_1", "../pipe_c2s_1", NULL};
-	semid[i] = mysemget(2);
-	execv("Service", parmList);
+	char *const parmList[] = {"SERVICE/service", numService, "2", fd, "../pipe_s2c_1", "../pipe_c2s_1", NULL};
+	semid[i] = mysemget_create(2);
+	ret = execv("SERVICE/service", parmList);
+	myassert(ret != -1, "Erreur du execv"); 
       }
       
       else if(i == 2){
-	char *const parmList[] = {"Service", "2", "3", fd, "../pipe_s2c_2", "../pipe_c2s_2", NULL};
-	semid[i] = mysemget(3);
-	execv("Service", parmList);
+	char *const parmList[] = {"SERVICE/service", numService, "3", fd, "../pipe_s2c_2", "../pipe_c2s_2", NULL};
+	semid[i] = mysemget_create(3);
+	ret = execv("SERVICE/service", parmList);
+	myassert(ret != -1, "Erreur du execv"); 
       }
-      
-      
-      
-      printf("Probleme dans le exec\n");//on est pas sensé se retrouver ici
     }
     else{
       ret = close(pipe_OtoS[i][0]);//on ferme le tube anonyme en lecture du coté du orchestre
-      assert(ret != -1);
+      myassert(ret != -1, "Erreur dans la fermeture du tube anonyme en lecture");
     }
   }
 }
@@ -125,14 +130,16 @@ int main(int argc, char * argv[])
   // - un sémaphore pour que le service préviene l'orchestre de la fin d'un traitement
   // - création de deux tubes nommés (pour chaque service) pour les communications entre les clients et les services
   startServices(unnamed_pipe_OtoS, semidS);
-  
   while (! fin)
     {
+      printf("début boucle while orchestre \n");
       // ouverture ici des tubes nommés avec un client
       fd = open_pipes_o(); //fd[0]->lecture  /  fd[1]->ecriture
       
       // attente d'une demande de service du client
+      printf("attente d'une demande du client \n");
       service = rcv_request(fd[0]);
+      
       
       // détecter la fin des traitements lancés précédemment via
       // les sémaphores dédiés (attention on n'attend pas la
@@ -147,6 +154,7 @@ int main(int argc, char * argv[])
       // si ordre de fin
       //     envoi au client d'un code d'acceptation (via le tube nommé)
       //     marquer le booléen de fin de la boucle
+      printf("analyse demande de client... \n");
       if(service == -1){
 	send_reply(fd[1], true);
 	fin = true;

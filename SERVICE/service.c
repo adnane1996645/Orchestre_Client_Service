@@ -1,6 +1,6 @@
 /****************************************************************
 Bionôme :  - Adnane LAANANI
-           -
+           - Esteban Mauricio
 *****************************************************************/
 #define  _XOPEN_SOURCE 700
 #include <stdio.h>
@@ -53,7 +53,7 @@ int main(int argc, char * argv[])
     // initialisations diverses : analyse de argv
     fdServiceFromOrchestre = strtol(argv[2], NULL, 10);
 
-    printf("SERVICE... :\n");
+    printf("SERVICE... :%d\n",Service);
     if(Service < SERVICE_ARRET || Service >= SERVICE_NB)
         usage(argv[0], "Le numéro de service est invalide\n");
 

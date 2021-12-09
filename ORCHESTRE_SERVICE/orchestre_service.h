@@ -7,7 +7,7 @@
 //   d'un traitement
 #include <stdbool.h>
 
-#define ORCHESTRE_SERVICE "../ORCHESTRE_SERVICE/orchestre_service.h"
+#define ORCHESTRE_SERVICE "ORCHESTRE_SERVICE/orchestre_service.h"
 
 typedef struct OrderP * Order;
 

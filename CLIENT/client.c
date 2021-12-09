@@ -2,13 +2,15 @@
  * Projet CC2
  * Programmation avancée en C
  *
- * Auteurs: Esteban Mauricio & Adnane
+ * Auteurs: Esteban Mauricio & Adnane LAANANI
  ************************************************************************/
 #define _XOPEN_SOURCE 700
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "../UTILS/memory.h"
 #include "../UTILS/myassert.h"
@@ -22,8 +24,7 @@
 #include "client_somme.h"
 #include "client_maximum.h"
 #include "client_compression.h"
-#include <string.h>
-#include <unistd.h>
+
 
 
 static void usage(const char *exeName, const char *message)

@@ -6,7 +6,7 @@
 // - les deux tubes nommés pour la communication bidirectionnelle
 #include <stdbool.h>
 // fichier choisi pour l'identification du sémaphore
-#define CLIENT_ORCHESTRE "../CLIENT_ORCHESTRE/client_orchestre.h"
+#define CLIENT_ORCHESTRE "CLIENT_ORCHESTRE/client_orchestre.h"
 
 // identifiant pour le deuxième paramètre de ftok
 #define PROJ_ID 5

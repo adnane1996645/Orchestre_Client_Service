@@ -1,6 +1,4 @@
-#include "myassert.h"
 #include <string.h>
-#include "orchestre_service.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -8,7 +6,10 @@
 #include <sys/sem.h>
 #include <unistd.h>
 #include <stdbool.h>
+
+#include "orchestre_service.h"
 #include "memory.h"
+#include "myassert.h"
 #define _XOPEN_SOURCE 700
 
 
@@ -58,7 +59,9 @@ Order getOrderFromOrchestre(int fdRead)
     Order order = NULL;
 
     MY_MALLOC(order, struct OrderP, 1);
-    read(fdRead, &(order->isOk), sizeof(bool));
+    printf("read\n");//est affiché
+    read(fdRead, &(order->isOk), sizeof(bool));//blocage
+    printf("read\n");//n'est pas affiché
     if(order->isOk)
         read(fdRead, &(order->motpasse), sizeof(int));
     close(fdRead);
@@ -67,14 +70,18 @@ Order getOrderFromOrchestre(int fdRead)
 
 int mysemget_create(int pojid)
 {
-    int semId;
+  int semId, ret;
     key_t key;
 
     key = ftok(ORCHESTRE_SERVICE, pojid);
     myassert(key!=-1, "Erreur dans la création de la clé dans la fonction mysemget_create");
+    
     semId = semget(key, 1, IPC_CREAT | IPC_EXCL | 0641);
     myassert(key!=-1, "Erreur dans la création du semaphore dans la fonction mysemget_create");
-    semctl(semId, 0, SETVAL, 1);
+    
+    ret = semctl(semId, 0, SETVAL, 1);
+    myassert(ret !=-1, "Erreur dans l'initialisation du sémaphore dans la fonction mysemget_create");
+    
     return semId;
 }
 
@@ -82,6 +89,8 @@ int mysemget(int pojid)
 {
     int semId;
     key_t key = ftok(ORCHESTRE_SERVICE, pojid);
+    myassert(key!=-1, "Erreur dans la création de la clé dans la fonction mysemget");
+    
     semId = semget(key, 1, 0);
     myassert(semId!=-1, "Erreur dans la récupération du semaphore dans la fonction mysemget");
     return semId;
