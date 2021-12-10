@@ -66,7 +66,7 @@ int main(int argc, char * argv[])
     while (true)
     {
         // attente d'un code de l'orchestre (via tube anonyme)
-        printf("Reception de l'ordre de orchestre ...:\n");
+        printf("Reception de l'ordre de orchestre ...:\n\n");
         Order order = getOrderFromOrchestre(fdServiceFromOrchestre);
         if(!isItOk(order))
         {

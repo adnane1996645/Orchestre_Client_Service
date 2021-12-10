@@ -84,10 +84,13 @@ Com init_com(int num_service, int mdp){//initialisation communication services-c
   c->pipe1 = "../pipe_c2s_";//on laisse une place de libre a la fin de la chaine pour le numéro du service
   c->pipe2 = "../pipe_s2c_";
 
+  printf("attente d'une demande du client . pipe1 = %s\n",c->pipe1);
+
   ret = sprintf(a, "%d", num_service);//convertion int en chaine
   myassert(ret >= 0, "Erreur lors de la convertion en chaine de caractere du numéro du service");
 
   strcat(c->pipe1, a);//on concatène pour former le nom du tube en entier
+  printf("attente d'une demande du client . pipe1 = %s\n",c->pipe1);
   strcat(c->pipe2, a);
 
   ret = mkfifo(c->pipe1, 0641);
@@ -100,6 +103,7 @@ Com init_com(int num_service, int mdp){//initialisation communication services-c
 
 
 void send_com(int fdWrite, constCom c){
+  printf("send_com\n");
   int ret = write(fdWrite, &c, sizeof(int));
   myassert(ret != -1, "Erreur dans l'envoi des tubes et du mot de pass via la structure com");
 }
@@ -114,10 +118,13 @@ Com rcv_com(int fdRead){//recevoir le nom des tube et mdp pour la com service cl
 
 void destroy_com(Com *pself){
   Com self = *pself;
-
-  MY_FREE(self);
+  printf("avant  \n\n");
+  MY_FREE(pself);
+  printf("1  \n\n");
   MY_FREE(self->pipe1);
+  printf("2 \n\n");
   MY_FREE(self->pipe2);
+  printf("apres  \n\n");
 }
 
 int getPwd(constCom c){
@@ -180,7 +187,7 @@ void rcv_adc(int fdRead){ // coté orchestre
 
 //////////mutex//////////
 
-void creat_mutex(){//on ne retourne pas le semid car l'orchestre ne l'utilise pas
+int creat_mutex(){
   key_t key = ftok(CLIENT_ORCHESTRE, PROJ_ID);
   //printf("%s\n",strerror(errno));
   myassert(key != -1, "Erreur dans la création de la clé pour la création du mutex ");
@@ -190,7 +197,8 @@ void creat_mutex(){//on ne retourne pas le semid car l'orchestre ne l'utilise pa
 
   int ret = semctl(semid, 0, SETVAL, 1);//1 pour imiter un mutex
   myassert(ret != -1, "Erreur dans l'initialisation du mutex");
-
+  
+  return semid;
 }
 
 int recup_mutex(){//c'est une erreur d'appeler cette fonction si le mutex n'a pas été créé préalablement

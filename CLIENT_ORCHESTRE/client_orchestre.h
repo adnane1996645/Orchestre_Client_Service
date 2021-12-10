@@ -38,7 +38,7 @@ void send_adc(int fdWrite);//adc = accusé de réception
 void rcv_adc(int fdRead); // coté orchestre
 
 
-void creat_mutex();
+int creat_mutex();
 int recup_mutex();
 void v_mutex(int semid);
 void p_mutex(int semid);

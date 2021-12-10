@@ -73,7 +73,6 @@ int main(int argc, char * argv[])
 
     // ouverture des tubes avec l'orchestre
     fd = open_pipes_c(); //fd[0]->lecture  /  fd[1]->ecriture
-    printf("ap ouverture des tube avec l'orchestre et avant l'envoi du numservice \n");
 
     // envoi à l'orchestre du numéro du service
     send_request(fd[1], numService);
@@ -112,11 +111,12 @@ int main(int argc, char * argv[])
     // si pas d'erreur(de code d'erreur) et service normal(donc de 0 à 2)
 
     if((rp == true) && numService != -1){  //l'orchestre a accepté la demande (demande qui n'ai pas une demande d'arret)
-
+      printf("ouverture tube avec service \n\n");
 
     //     ouverture des tubes avec le service
       int fdW = openTubeWrite(getPipe(com, 1), "erreur d'ouverture en écriture du tube entre le client et les service");
       int fdR = openTubeRead(getPipe(com, 2), "erreur d'ouverture en lecture du tube entre le client et les service");
+      printf("fin ouverture tube avec service \n\n");
 
     //     envoi du mot de passe au service
       sendPWD(fd[1], getPwd(com));

@@ -59,9 +59,7 @@ Order getOrderFromOrchestre(int fdRead)
     Order order = NULL;
 
     MY_MALLOC(order, struct OrderP, 1);
-    printf("read\n");//est affiché
-    read(fdRead, &(order->isOk), sizeof(bool));//blocage
-    printf("read\n");//n'est pas affiché
+    read(fdRead, &(order->isOk), sizeof(bool));
     if(order->isOk)
         read(fdRead, &(order->motpasse), sizeof(int));
     close(fdRead);
