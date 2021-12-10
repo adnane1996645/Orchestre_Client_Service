@@ -240,6 +240,12 @@ int main(int argc, char * argv[])
   // libération des ressources
   destroy_Order(&ord);
   destroy_mutex(semid);
+  int ret = unlink("pipe_c2o");//suppression du tube nommé
+  myassert(ret != -1, "Erreur dans la suppression du tube nommé c2o");
+  ret = unlink("pipe_o2c");
+  myassert(ret != -1, "Erreur dans la suppression du tube nommé o2c");
+
+  
   printf("le programme c'est terminer avec succés! \n\n");
   return EXIT_SUCCESS;
 }
