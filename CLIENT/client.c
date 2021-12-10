@@ -73,6 +73,7 @@ int main(int argc, char * argv[])
 
     // ouverture des tubes avec l'orchestre
     fd = open_pipes_c(); //fd[0]->lecture  /  fd[1]->ecriture
+    printf("ap ouverture des tube avec l'orchestre et avant l'envoi du numservice \n");
 
     // envoi à l'orchestre du numéro du service
     send_request(fd[1], numService);

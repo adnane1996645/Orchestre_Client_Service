@@ -132,7 +132,7 @@ int main(int argc, char * argv[])
   startServices(unnamed_pipe_OtoS, semidS);
   while (! fin)
     {
-      printf("début boucle while orchestre \n");
+      
       // ouverture ici des tubes nommés avec un client
       fd = open_pipes_o(); //fd[0]->lecture  /  fd[1]->ecriture
       

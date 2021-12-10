@@ -70,7 +70,7 @@ int main(int argc, char * argv[])
         Order order = getOrderFromOrchestre(fdServiceFromOrchestre);
         if(!isItOk(order))
         {
-          printf("||\n||=>    L'ordre est un ordre de fin.\n");
+          printf("||\n||=>  L'ordre est un ordre de fin. S n°%d\n",Service);
                 break;        //code de fin => sortie de la boucle
         }
         else

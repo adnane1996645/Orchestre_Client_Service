@@ -34,25 +34,27 @@ int * open_pipes_c(){ //coté client
   int *fd;
   
   MY_MALLOC(fd, int, 2);
+  fd[1] = open("pipe_c2o", O_WRONLY);//ecriture
+  myassert(fd[1] != -1, "Erreur dans l'ouverture en ecriture coté client du tube nommé c2o");
+  
   fd[0]= open("pipe_o2c", O_RDONLY);//lecture
   myassert(fd[0] != -1, "Erreur dans l'ouverture en lecture coté client du tube nommé o2c ");
   
-  fd[1] = open("pipe_c2o", O_WRONLY);//ecriture
-  myassert(fd[1] != -1, "Erreur dans l'ouverture en ecriture coté client du tube nommé c2o");
+  
 
   return fd;
 }
 
 int * open_pipes_o(){ //coté orchestre
   int *fd;
-  printf("deb\n");
+  
   MY_MALLOC(fd, int, 2);
   fd[0] = open("pipe_c2o", O_RDONLY);
   myassert(fd[0] != -1, "Erreur dans l'ouverture en lecture coté orchestre du tube nommé c2o");
-  printf("mid\n");
+  
   fd[1] = open("pipe_o2c", O_WRONLY);
   myassert(fd[1] != -1, "Erreur dans l'ouverture en ecriture coté orchestre du tube nommé o2c ");
-  printf("fin\n");
+  
 
   return fd;
 }
