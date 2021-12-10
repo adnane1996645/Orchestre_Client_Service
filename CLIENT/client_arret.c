@@ -29,3 +29,8 @@ void client_arret_verifArgs(int argc, char * argv[])
     if (argc != 2)
         usage(argv[0], argv[1], "nombre d'arguments");
 }
+
+void client_arret(char * argv[])
+{
+    usage(argv[0], argv[1], "arrêt du client\n");
+}

@@ -88,7 +88,9 @@ int main(int argc, char * argv[])
     // sinon si demande d'arrêt (i.e. numService == -1)
     //     afficher un message
     else if(numService == -1)
+    {
       printf("l'orchestre va s'arrêter \n");
+    }
 
     // sinon
     //     récupération du mot de passe et des noms des 2 tubes
