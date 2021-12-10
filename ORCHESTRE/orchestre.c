@@ -198,7 +198,7 @@ int main(int argc, char * argv[])
       
       // attente d'un accusé de réception du client
       rcv_adc(fd[0]);
-      printf("adc  \n\n");
+      printf("accusé de reception reçus  \n\n");
 
       // fermer les tubes vers le client
       close_pipes(fd);
