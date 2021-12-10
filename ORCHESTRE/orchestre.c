@@ -42,6 +42,10 @@ static void usage(const char *exeName, const char *message)
 // il n'y à pas d'allocation dynamique car peux importe le nb de service, on passera tjr en param un tableau a 2 colonnes
 static void startServices(int (*pipe_OtoS)[2],int semid[]){//2 colonnes(donc une ligne) pour chaque pipe
 
+  for(int i = 0; i < 3; i++){//création des semaphore pour les services
+    semid[i] = mysemget_create(i+1);
+  }
+  
   int resFork = fork();
   myassert(resFork != -1, "Erreur dans l'exécution du fork exterieur a la boucle for");
   
@@ -75,21 +79,18 @@ static void startServices(int (*pipe_OtoS)[2],int semid[]){//2 colonnes(donc une
       
       if(i == 0){// en position 2 ("1") c'est le projid pour la clé de semaphore
 	char *const parmList[] = {"SERVICE/service", numService, "1", fd, "../pipe_s2c_0", "../pipe_c2s_0", NULL};
-	semid[i] = mysemget_create(1);
 	ret = execv("SERVICE/service", parmList);
 	myassert(ret != -1, "Erreur du execv"); 
       }
       
       else if(i == 1){
 	char *const parmList[] = {"SERVICE/service", numService, "2", fd, "../pipe_s2c_1", "../pipe_c2s_1", NULL};
-	semid[i] = mysemget_create(2);
 	ret = execv("SERVICE/service", parmList);
 	myassert(ret != -1, "Erreur du execv"); 
       }
       
       else if(i == 2){
 	char *const parmList[] = {"SERVICE/service", numService, "3", fd, "../pipe_s2c_2", "../pipe_c2s_2", NULL};
-	semid[i] = mysemget_create(3);
 	ret = execv("SERVICE/service", parmList);
 	myassert(ret != -1, "Erreur du execv"); 
       }
@@ -198,29 +199,23 @@ int main(int argc, char * argv[])
       
       // attente d'un accusé de réception du client
       rcv_adc(fd[0]);
-      printf("accusé de reception reçus  \n\n");
 
       // fermer les tubes vers le client
       close_pipes(fd);
-      printf("tube fermé  \n\n");
       
       // il peut y avoir un problème si l'orchestre revient en haut de la
       // boucle avant que le client ait eu le temps de fermer les tubes
       // il faudrait régler cela avec un sémaphore, mais on va se contenter
       // d'une attente de 1 seconde (solution non satisfaisante mais simple)
       sleep(1);
-      if(c != NULL){//peut importe que ce code soit avant ou après le sleep
-	printf("destr com  \n\n");
+      
+      if(c != NULL)//peut importe que ce code soit avant ou après le sleep
 	destroy_com(&c);//on libere l'espace alloué par les mallocs fais dans les init ici
-	printf("fin destr com  \n\n");
-      }
-      if(ord != NULL){//car on peux pas le faire en dehors de la boucle sans perdre les adresses des précédentes allocations
-	printf("destr order  \n\n");
+      
+      if(ord != NULL)//car on peux pas le faire en dehors de la boucle sans perdre les adresses des précédentes allocations
 	destroy_Order(&ord);
-	printf("fin destr com  \n\n");
-      }
+      
     }
-  
   
   // attente de la fin des traitements en cours (via les sémaphores)
   
@@ -229,7 +224,7 @@ int main(int argc, char * argv[])
   for(int i = 0; i < 3; i++)
     mysem_attente(semidS[i]);
   
-  
+  printf(" envoi aux service d'un code de fin... \n\n");
   // envoi à chaque service d'un code de fin
   ord = init_Order(false, pwd);
   
@@ -245,6 +240,6 @@ int main(int argc, char * argv[])
   // libération des ressources
   destroy_Order(&ord);
   destroy_mutex(semid);
-  
+  printf("le programme c'est terminer avec succés! \n\n");
   return EXIT_SUCCESS;
 }
